@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>昨夜星辰-锦春来 · 浩瀚宇宙，广袤星辰</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@300;400;600;700&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@300;400;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root {
   --void: #050510;
@@ -30,14 +30,17 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ═══════ CANVAS ═══════ */
+body.warping { overflow: hidden; }
+body.arrived { overflow-y: auto; }
+
 #cosmos {
   position: fixed;
   inset: 0;
   z-index: 0;
+  transition: opacity 0.8s ease;
 }
+#cosmos.dim { opacity: 0; }
 
-/* ═══════ NOISE ═══════ */
 .grain {
   position: fixed; inset: 0;
   z-index: 9998;
@@ -79,7 +82,16 @@ body {
 }
 
 /* ═══════ PAGE WRAPPER ═══════ */
-.page { position: relative; z-index: 1; }
+.page {
+  position: relative;
+  z-index: 1;
+  transition: opacity 0.8s ease, filter 0.8s ease;
+}
+.page.hidden-during-warp {
+  opacity: 0;
+  filter: blur(20px);
+  pointer-events: none;
+}
 
 /* ═══════ TOP BAR ═══════ */
 .topbar {
@@ -93,13 +105,19 @@ body {
   backdrop-filter: blur(12px);
   background: rgba(5,5,16,0.6);
   border-bottom: 1px solid rgba(240,192,64,0.06);
+  transition: opacity 0.6s ease;
 }
+.topbar.fade { opacity: 0; pointer-events: none; }
 .topbar-logo {
   font-family: 'Ma Shan Zheng', cursive;
   font-size: 1.3rem;
   color: var(--gold-bright);
   text-shadow: 0 0 20px rgba(240,192,64,0.3);
 }
+.topbar-links { display: flex; align-items: center; gap: 16px; }
+.topbar-links a { color: rgba(232,228,240,0.5); transition: color 0.3s; }
+.topbar-links a:hover { color: var(--gold-bright); }
+.topbar-links svg { width: 18px; height: 18px; fill: currentColor; display: block; }
 .topbar-badge {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.55rem;
@@ -112,7 +130,7 @@ body {
 
 /* ═══════ HERO ═══════ */
 .hero {
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -120,8 +138,8 @@ body {
   text-align: center;
   position: relative;
   overflow: hidden;
+  padding: 80px 20px 40px;
 }
-
 .hero-nebula {
   position: absolute;
   width: 800px; height: 800px;
@@ -138,7 +156,6 @@ body {
   0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.6; }
   50% { transform: scale(1.15) rotate(5deg); opacity: 1; }
 }
-
 .hero-test-badge {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.6rem;
@@ -154,7 +171,6 @@ body {
   backdrop-filter: blur(4px);
   background: rgba(62,207,207,0.03);
 }
-
 .hero-title-cn {
   font-family: 'Ma Shan Zheng', cursive;
   font-size: clamp(2.5rem, 8vw, 6rem);
@@ -164,7 +180,6 @@ body {
   animation: fadeUp 1.2s cubic-bezier(0.19,1,0.22,1) forwards 0.8s;
   text-shadow: 0 0 60px rgba(240,192,64,0.15), 0 0 120px rgba(123,94,167,0.1);
 }
-
 .hero-title-en {
   font-family: 'Cormorant Garamond', serif;
   font-size: clamp(0.9rem, 2vw, 1.3rem);
@@ -176,7 +191,6 @@ body {
   opacity: 0;
   animation: fadeIn 1.2s ease forwards 1.2s;
 }
-
 .hero-divider {
   width: 60px; height: 1px;
   background: linear-gradient(90deg, transparent, var(--gold-bright), transparent);
@@ -184,7 +198,6 @@ body {
   opacity: 0;
   animation: fadeIn 1s ease forwards 1.5s;
 }
-
 .hero-author {
   font-family: 'Noto Serif SC', serif;
   font-size: 0.95rem;
@@ -194,7 +207,6 @@ body {
   opacity: 0;
   animation: fadeUp 1s ease forwards 1.7s;
 }
-
 .hero-date {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.65rem;
@@ -205,15 +217,95 @@ body {
   animation: fadeIn 1s ease forwards 2s;
 }
 
+/* CTA BUTTON */
+.warp-cta-wrap {
+  margin-top: 50px;
+  opacity: 0;
+  animation: fadeUp 1.2s cubic-bezier(0.19,1,0.22,1) forwards 2.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.warp-cta {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 36px;
+  background: linear-gradient(135deg, rgba(240,192,64,0.08), rgba(123,94,167,0.08));
+  border: 1px solid rgba(240,192,64,0.35);
+  color: var(--gold-bright);
+  font-family: 'Noto Serif SC', serif;
+  font-size: 0.95rem;
+  letter-spacing: 0.2em;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 4px;
+  text-transform: uppercase;
+  transition: all 0.4s cubic-bezier(0.19,1,0.22,1);
+  overflow: hidden;
+  outline: none;
+}
+.warp-cta::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(240,192,64,0.2) 50%,
+    transparent 100%);
+  transform: translateX(-100%);
+  transition: transform 0.7s ease;
+}
+.warp-cta:hover {
+  border-color: var(--gold-bright);
+  color: #fff;
+  box-shadow: 0 0 40px rgba(240,192,64,0.35), inset 0 0 20px rgba(240,192,64,0.1);
+  transform: translateY(-2px);
+}
+.warp-cta:hover::before { transform: translateX(100%); }
+.warp-cta:active { transform: translateY(0); }
+.warp-cta-icon {
+  display: inline-block;
+  width: 16px; height: 16px;
+  position: relative;
+}
+.warp-cta-icon::before, .warp-cta-icon::after {
+  content: '';
+  position: absolute;
+  background: currentColor;
+}
+.warp-cta-icon::before {
+  width: 100%; height: 2px;
+  top: 50%; left: 0;
+  transform: translateY(-50%);
+  box-shadow: 0 0 8px currentColor;
+}
+.warp-cta-icon::after {
+  width: 6px; height: 6px;
+  border-top: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+  background: transparent;
+  right: 0; top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+}
+.warp-cta-hint {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.35em;
+  color: rgba(232,228,240,0.35);
+}
+
 .scroll-indicator {
   position: absolute;
-  bottom: 30px;
+  bottom: 24px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
   opacity: 0;
-  animation: fadeIn 1s ease forwards 2.5s;
+  animation: fadeIn 1s ease forwards 2.8s;
 }
 .scroll-indicator span {
   font-family: 'JetBrains Mono', monospace;
@@ -230,10 +322,7 @@ body {
   0%,100% { opacity: 0.2; transform: scaleY(0.5); }
   50% { opacity: 0.8; transform: scaleY(1); }
 }
-
-@keyframes fadeIn {
-  from { opacity: 0; } to { opacity: 1; }
-}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(25px); }
   to { opacity: 1; transform: translateY(0); }
@@ -245,7 +334,6 @@ body {
   display: flex;
   justify-content: center;
 }
-
 .announce-card {
   max-width: 720px;
   width: 100%;
@@ -278,9 +366,7 @@ body {
   width: 100%; height: 3px;
   background: linear-gradient(90deg, var(--gold-bright), var(--nebula-pink), var(--nebula-purple));
 }
-
 .announce-icon { font-size: 2rem; margin-bottom: 16px; }
-
 .announce-title {
   font-family: 'Noto Serif SC', serif;
   font-size: 1.6rem;
@@ -292,7 +378,6 @@ body {
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
-
 .announce-body {
   font-size: 0.92rem;
   line-height: 2;
@@ -301,9 +386,63 @@ body {
 }
 .announce-body strong { color: var(--gold-bright); font-weight: 600; }
 .announce-body .highlight { color: var(--nebula-cyan); }
-
-.announce-meta {
+.announce-body .pulse-dot {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--nebula-cyan);
+  margin-right: 8px;
+  vertical-align: middle;
+  animation: pulse-dot 1.4s ease-in-out infinite;
+  box-shadow: 0 0 12px var(--nebula-cyan);
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 0.4; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+.announce-progress {
   margin-top: 28px;
+  padding: 18px 0;
+}
+.announce-progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  color: rgba(232,228,240,0.5);
+  margin-bottom: 10px;
+}
+.announce-progress-label .pct { color: var(--gold-bright); font-weight: 500; }
+.announce-progress-bar {
+  height: 4px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+.announce-progress-fill {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, var(--nebula-purple), var(--gold-bright), var(--nebula-cyan));
+  border-radius: 2px;
+  position: relative;
+  transition: width 2s cubic-bezier(0.19,1,0.22,1);
+  box-shadow: 0 0 10px rgba(240,192,64,0.5);
+}
+.announce-progress-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  animation: shimmer 2s linear infinite;
+}
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.announce-meta {
+  margin-top: 20px;
   padding-top: 20px;
   border-top: 1px solid rgba(240,192,64,0.08);
   display: flex;
@@ -321,7 +460,6 @@ body {
 
 /* ═══════ TIMELINE ═══════ */
 .timeline-section { padding: 60px 8vw 100px; }
-
 .section-label {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.55rem;
@@ -340,7 +478,6 @@ body {
   color: var(--star-white);
 }
 .section-heading i { color: var(--gold-dim); }
-
 .timeline {
   position: relative;
   max-width: 700px;
@@ -354,7 +491,6 @@ body {
   width: 1px;
   background: linear-gradient(to bottom, var(--gold-bright), rgba(240,192,64,0.1), transparent);
 }
-
 .tl-item {
   position: relative;
   margin-bottom: 50px;
@@ -365,7 +501,6 @@ body {
   opacity: 1; transform: translateX(0);
   transition: all 0.8s cubic-bezier(0.19,1,0.22,1);
 }
-
 .tl-dot {
   position: absolute;
   left: -36px; top: 6px;
@@ -378,7 +513,6 @@ body {
   background: var(--gold-bright);
   box-shadow: 0 0 12px rgba(240,192,64,0.5);
 }
-
 .tl-year {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.65rem;
@@ -401,7 +535,6 @@ body {
 
 /* ═══════ FEATURES COSMOS GRID ═══════ */
 .features-section { padding: 80px 8vw 100px; }
-
 .cosmos-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -409,7 +542,6 @@ body {
   max-width: 960px;
   margin: 0 auto;
 }
-
 .cosmos-card {
   border-radius: 20px;
   padding: 36px 30px;
@@ -420,14 +552,11 @@ body {
   transform: translateY(30px);
   transition: all 0.6s cubic-bezier(0.19,1,0.22,1), box-shadow 0.4s;
 }
-.cosmos-card.visible {
-  opacity: 1; transform: translateY(0);
-}
+.cosmos-card.visible { opacity: 1; transform: translateY(0); }
 .cosmos-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 16px 48px rgba(0,0,0,0.4);
 }
-
 .cosmos-card .c-icon { font-size: 2rem; margin-bottom: 16px; display: block; }
 .cosmos-card .c-title {
   font-family: 'Cormorant Garamond', serif;
@@ -441,7 +570,6 @@ body {
   color: rgba(232,228,240,0.5);
   font-weight: 300;
 }
-
 .cc1 { background: linear-gradient(160deg, #0f1528, #0a0f1e); border-color: rgba(62,207,207,0.1); }
 .cc2 { background: linear-gradient(160deg, #170f20, #0e0a18); border-color: rgba(123,94,167,0.1); }
 .cc3 { background: linear-gradient(160deg, #1a1308, #100e06); border-color: rgba(240,192,64,0.1); }
@@ -482,7 +610,6 @@ body {
   padding: 60px 8vw 20px;
   text-align: center;
 }
-
 .social-orbit {
   display: flex;
   justify-content: center;
@@ -491,7 +618,6 @@ body {
   margin-top: 36px;
   flex-wrap: wrap;
 }
-
 .social-link {
   display: flex;
   flex-direction: column;
@@ -499,204 +625,214 @@ body {
   gap: 10px;
   text-decoration: none;
   color: var(--star-white);
-  padding: 24px 28px;
-  border-radius: 20px;
-  background: rgba(255,255,255,0.02);
+  padding: 24px 32px;
+  border-radius: 18px;
   border: 1px solid rgba(255,255,255,0.05);
+  background: rgba(10,10,26,0.5);
+  min-width: 150px;
+  opacity: 0;
+  transform: translateY(20px);
   transition: all 0.5s cubic-bezier(0.19,1,0.22,1);
-  position: relative;
-  overflow: hidden;
-  min-width: 140px;
-  opacity: 0;
-  transform: translateY(30px);
 }
-.social-link.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-.social-link::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 20px;
-  opacity: 0;
-  transition: opacity 0.4s;
-}
+.social-link.visible { opacity: 1; transform: translateY(0); }
 .social-link:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  transform: translateY(-5px);
+  border-color: rgba(240,192,64,0.3);
+  box-shadow: 0 14px 36px rgba(0,0,0,0.5);
 }
-.social-link:hover::before { opacity: 1; }
-
-.social-link.gh::before { background: radial-gradient(circle at 50% 80%, rgba(232,228,240,0.06), transparent 70%); }
-.social-link.gh:hover { border-color: rgba(232,228,240,0.2); }
-
-.social-link.ge::before { background: radial-gradient(circle at 50% 80%, rgba(212,48,48,0.06), transparent 70%); }
-.social-link.ge:hover { border-color: rgba(212,48,48,0.2); }
-
-.social-link.fb::before { background: radial-gradient(circle at 50% 80%, rgba(62,207,207,0.06), transparent 70%); }
-.social-link.fb:hover { border-color: rgba(62,207,207,0.2); }
-
-.social-icon {
-  width: 42px; height: 42px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.3rem;
-  transition: transform 0.4s cubic-bezier(0.19,1,0.22,1);
-}
-.social-link:hover .social-icon { transform: scale(1.15) rotate(-3deg); }
-
-.social-icon svg { width: 26px; height: 26px; fill: currentColor; }
-
+.social-icon { width: 32px; height: 32px; color: var(--star-white); }
+.social-icon svg { width: 100%; height: 100%; fill: currentColor; }
 .social-name {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.65rem;
-  letter-spacing: 0.15em;
-  color: rgba(232,228,240,0.5);
-  transition: color 0.3s;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1rem;
+  font-weight: 600;
 }
-.social-link:hover .social-name { color: var(--star-white); }
-
 .social-id {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 0.5rem;
-  color: rgba(232,228,240,0.25);
-  letter-spacing: 0.1em;
-}
-
-/* Topbar links */
-.topbar-links {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-.topbar-links a {
+  font-size: 0.55rem;
+  letter-spacing: 0.2em;
   color: rgba(232,228,240,0.4);
-  text-decoration: none;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.55rem;
-  letter-spacing: 0.1em;
-  transition: color 0.3s;
-  display: flex;
-  align-items: center;
-  gap: 4px;
 }
-.topbar-links a:hover { color: var(--gold-bright); }
-.topbar-links a svg { width: 14px; height: 14px; fill: currentColor; }
-
-/* Footer links */
-.footer-center {
-  display: flex;
-  gap: 20px;
-  align-items: center;
-}
-.footer-center a {
-  color: rgba(232,228,240,0.3);
-  text-decoration: none;
-  transition: color 0.3s;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.55rem;
-  letter-spacing: 0.1em;
-}
-.footer-center a:hover { color: var(--gold-bright); }
-.footer-center a svg { width: 14px; height: 14px; fill: currentColor; }
 
 /* ═══════ COMING SOON ═══════ */
-.coming-section { padding: 100px 8vw; text-align: center; }
+.coming-section {
+  padding: 100px 8vw;
+  text-align: center;
+  position: relative;
+}
 .coming-badge {
   display: inline-block;
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.6rem;
-  letter-spacing: 0.5em;
+  letter-spacing: 0.4em;
   color: var(--nebula-pink);
   border: 1px solid rgba(212,86,122,0.3);
-  padding: 6px 24px;
+  padding: 6px 18px;
   border-radius: 100px;
-  margin-bottom: 24px;
-  animation: glow-badge 3s ease-in-out infinite;
+  margin-bottom: 22px;
+  position: relative;
 }
-@keyframes glow-badge {
-  0%,100% { box-shadow: 0 0 10px rgba(212,86,122,0.1); }
-  50% { box-shadow: 0 0 25px rgba(212,86,122,0.2); }
+.coming-badge::before {
+  content: '';
+  display: inline-block;
+  width: 6px; height: 6px;
+  background: var(--nebula-pink);
+  border-radius: 50%;
+  margin-right: 8px;
+  vertical-align: middle;
+  animation: pulse-dot 1.4s ease-in-out infinite;
+  box-shadow: 0 0 8px var(--nebula-pink);
 }
 .coming-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(2rem, 6vw, 4rem);
-  font-weight: 300;
+  font-family: 'Ma Shan Zheng', cursive;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  color: var(--star-white);
   margin-bottom: 16px;
 }
-.coming-title span {
-  background: linear-gradient(135deg, var(--gold-bright), var(--nebula-pink));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  font-weight: 700;
-}
+.coming-title span { color: var(--gold-bright); }
 .coming-desc {
   font-size: 0.95rem;
-  color: rgba(232,228,240,0.45);
   line-height: 2;
-  max-width: 500px;
-  margin: 0 auto;
+  color: rgba(232,228,240,0.5);
   font-weight: 300;
+  max-width: 580px;
+  margin: 0 auto 40px;
 }
-
 .countdown-row {
   display: flex;
   justify-content: center;
-  gap: 24px;
-  margin-top: 40px;
+  gap: 30px;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
 }
-.cd-item { display: flex; flex-direction: column; align-items: center; }
+.cd-item {
+  min-width: 90px;
+  padding: 20px 14px;
+  background: linear-gradient(160deg, rgba(20,18,35,0.85), rgba(10,10,26,0.95));
+  border: 1px solid rgba(240,192,64,0.12);
+  border-radius: 14px;
+  position: relative;
+  overflow: hidden;
+}
+.cd-item::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-bright), transparent);
+  opacity: 0.5;
+}
 .cd-num {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 2.8rem;
-  font-weight: 700;
-  color: var(--star-white);
+  font-size: 2.4rem;
+  font-weight: 600;
+  color: var(--gold-bright);
   line-height: 1;
+  text-shadow: 0 0 20px rgba(240,192,64,0.3);
 }
 .cd-label {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 0.5rem;
+  font-size: 0.55rem;
   letter-spacing: 0.3em;
-  color: rgba(232,228,240,0.3);
-  margin-top: 6px;
+  color: rgba(232,228,240,0.4);
+  margin-top: 10px;
+}
+.coming-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 44px;
+  background: linear-gradient(135deg, var(--gold-bright), var(--cosmic-orange));
+  color: var(--void);
+  font-family: 'Noto Serif SC', serif;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  cursor: pointer;
+  border: none;
+  border-radius: 4px;
+  outline: none;
+  transition: all 0.4s cubic-bezier(0.19,1,0.22,1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(240,192,64,0.25);
+}
+.coming-cta::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.7s;
+}
+.coming-cta:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 48px rgba(240,192,64,0.45);
+}
+.coming-cta:hover::before { transform: translateX(100%); }
+.coming-cta-icon {
+  display: inline-block;
+  width: 14px; height: 14px;
+  position: relative;
+}
+.coming-cta-icon::before {
+  content: '';
+  position: absolute;
+  width: 100%; height: 2px;
+  background: currentColor;
+  top: 50%; transform: translateY(-50%);
+}
+.coming-cta-icon::after {
+  content: '';
+  position: absolute;
+  width: 6px; height: 6px;
+  border-top: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+  right: 0; top: 50%;
+  transform: translateY(-50%) rotate(45deg);
 }
 
 /* ═══════ FOOTER ═══════ */
 footer {
-  position: relative; z-index: 1;
-  padding: 40px 8vw;
-  border-top: 1px solid rgba(240,192,64,0.06);
+  padding: 50px 5vw 30px;
+  border-top: 1px solid rgba(240,192,64,0.08);
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 20px;
 }
 .footer-left {
   font-family: 'Ma Shan Zheng', cursive;
-  font-size: 1.1rem;
   color: var(--gold-dim);
+  font-size: 0.95rem;
 }
+.footer-center { display: flex; gap: 20px; }
+.footer-center a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  color: rgba(232,228,240,0.45);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  transition: color 0.3s;
+}
+.footer-center a:hover { color: var(--gold-bright); }
+.footer-center svg { width: 14px; height: 14px; fill: currentColor; }
 .footer-right {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.55rem;
   letter-spacing: 0.2em;
-  color: rgba(232,228,240,0.2);
+  color: rgba(232,228,240,0.3);
 }
 
-/* ═══════ SHOOTING STARS ═══════ */
+/* ═══════ SHOOTING STAR ═══════ */
 .shooting-star {
   position: fixed;
-  width: 80px; height: 1px;
-  background: linear-gradient(90deg, var(--gold-bright), transparent);
-  opacity: 0;
+  width: 120px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-bright), transparent);
   z-index: 0;
   pointer-events: none;
   animation: shoot 1.5s ease-out forwards;
@@ -708,7 +844,418 @@ footer {
   100% { opacity: 0; transform: translateX(300px) scaleX(1.5); }
 }
 
-/* ═══════ RESPONSIVE ═══════ */
+/* ═══════════════════════════════════════════════════════
+   WARP / 曲率引擎跃迁 IFRAME 嵌入 (One-Body)
+   ═══════════════════════════════════════════════════════ */
+.warp-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: #000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.8s ease;
+  pointer-events: none;
+}
+.warp-stage.show {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+.warp-stage iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
+.warp-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9500;
+  background: var(--void);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+.warp-loader.show { display: flex; }
+.warp-loader .loader-title {
+  font-family: 'Ma Shan Zheng', cursive;
+  font-size: 1.5rem;
+  color: var(--gold-bright);
+  letter-spacing: 0.4em;
+  text-shadow: 0 0 24px rgba(240,192,64,0.5);
+}
+.warp-loader .loader-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.5em;
+  color: var(--nebula-cyan);
+  opacity: 0.7;
+}
+.warp-loader .loader-bar {
+  width: 200px; height: 2px;
+  background: rgba(240,192,64,0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+.warp-loader .loader-bar div {
+  height: 100%;
+  width: 30%;
+  background: linear-gradient(90deg, transparent, var(--gold-bright), transparent);
+  animation: loader-slide 1.4s ease-in-out infinite;
+}
+@keyframes loader-slide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(400%); }
+}
+
+.warp-skip {
+  position: fixed;
+  bottom: 30px; right: 30px;
+  z-index: 9999;
+  padding: 10px 18px;
+  background: rgba(10,10,26,0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(240,192,64,0.25);
+  border-radius: 100px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  color: var(--gold-bright);
+  cursor: pointer;
+  display: none;
+  transition: all 0.3s ease;
+}
+.warp-skip.show { display: inline-flex; }
+.warp-skip:hover {
+  background: rgba(240,192,64,0.1);
+  border-color: var(--gold-bright);
+}
+
+.warp-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 9700;
+  background: white;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════
+   BLOG ARRIVED 抵达后博客界面
+   ═══════════════════════════════════════════════════════ */
+.blog-arrived {
+  position: relative;
+  z-index: 5;
+  display: none;
+  min-height: 100vh;
+  padding: 0;
+}
+.blog-arrived.show { display: block; }
+.blog-arrived.fade-in {
+  animation: blog-fade-in 1.5s cubic-bezier(0.19,1,0.22,1) forwards;
+}
+@keyframes blog-fade-in {
+  from { opacity: 0; transform: translateY(40px); filter: blur(20px); }
+  to   { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+.blog-hero {
+  min-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 100px 20px 60px;
+  position: relative;
+}
+.blog-hero-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.5em;
+  color: var(--nebula-cyan);
+  padding: 6px 20px;
+  border: 1px solid rgba(62,207,207,0.3);
+  border-radius: 100px;
+  margin-bottom: 28px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.blog-hero-badge::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--nebula-cyan);
+  box-shadow: 0 0 10px var(--nebula-cyan);
+  animation: pulse-dot 1.4s ease-in-out infinite;
+}
+.blog-hero-title {
+  font-family: 'Ma Shan Zheng', cursive;
+  font-size: clamp(2.5rem, 7vw, 5rem);
+  line-height: 1.3;
+  margin-bottom: 18px;
+  background: linear-gradient(135deg, var(--star-white) 30%, var(--gold-bright) 70%, var(--nebula-pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 80px rgba(240,192,64,0.2);
+}
+.blog-hero-sub {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: clamp(1rem, 2.2vw, 1.4rem);
+  letter-spacing: 0.15em;
+  color: rgba(232,228,240,0.5);
+  margin-bottom: 30px;
+}
+.blog-hero-divider {
+  width: 80px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-bright), transparent);
+  margin: 0 auto 30px;
+}
+.blog-hero-intro {
+  max-width: 680px;
+  font-size: 1rem;
+  line-height: 2;
+  color: rgba(232,228,240,0.7);
+  font-weight: 300;
+  margin: 0 auto;
+}
+.blog-about {
+  padding: 80px 8vw 60px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.blog-about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: start;
+}
+.blog-about-left .label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.5em;
+  color: var(--gold-dim);
+  margin-bottom: 14px;
+}
+.blog-about-left h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  font-weight: 300;
+  line-height: 1.2;
+  margin-bottom: 24px;
+}
+.blog-about-left h3 i { color: var(--gold-bright); }
+.blog-about-left p {
+  font-size: 0.95rem;
+  line-height: 2;
+  color: rgba(232,228,240,0.6);
+  font-weight: 300;
+}
+.blog-about-right {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.about-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 22px 26px;
+  background: linear-gradient(160deg, rgba(20,18,35,0.7), rgba(10,10,26,0.85));
+  border: 1px solid rgba(240,192,64,0.08);
+  border-radius: 14px;
+  position: relative;
+  overflow: hidden;
+}
+.about-stat::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: linear-gradient(to bottom, var(--gold-bright), transparent);
+}
+.about-stat .stat-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.25em;
+  color: rgba(232,228,240,0.5);
+}
+.about-stat .stat-value {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--gold-bright);
+  line-height: 1;
+}
+.about-stat .stat-value sup {
+  font-size: 0.7rem;
+  color: rgba(232,228,240,0.4);
+  font-family: 'JetBrains Mono', monospace;
+  margin-left: 4px;
+  letter-spacing: 0;
+  vertical-align: super;
+}
+.blog-posts {
+  padding: 60px 8vw 100px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.blog-posts-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 50px;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+.blog-posts-head h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2rem, 4.5vw, 3rem);
+  font-weight: 300;
+}
+.blog-posts-head h2 i { color: var(--gold-bright); font-style: italic; }
+.blog-posts-head .post-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.3em;
+  color: rgba(232,228,240,0.4);
+}
+.blog-posts-head .post-count b { color: var(--gold-bright); font-weight: 500; }
+.post-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 22px;
+}
+.post-card {
+  background: linear-gradient(160deg, rgba(20,18,35,0.75), rgba(10,10,26,0.9));
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 18px;
+  padding: 32px 28px 26px;
+  cursor: pointer;
+  transition: all 0.5s cubic-bezier(0.19,1,0.22,1);
+  position: relative;
+  overflow: hidden;
+}
+.post-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-color, var(--gold-bright)), transparent);
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+.post-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(240,192,64,0.25);
+  box-shadow: 0 22px 48px rgba(0,0,0,0.4);
+}
+.post-card:hover::before { opacity: 1; }
+.post-card[data-cat="tech"] { --accent-color: var(--nebula-cyan); }
+.post-card[data-cat="design"] { --accent-color: var(--nebula-purple); }
+.post-card[data-cat="thoughts"] { --accent-color: var(--gold-bright); }
+.post-card[data-cat="life"] { --accent-color: var(--nebula-pink); }
+.post-cat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--accent-color, var(--gold-bright));
+  margin-bottom: 16px;
+}
+.post-cat::before {
+  content: '';
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--accent-color, var(--gold-bright));
+  box-shadow: 0 0 8px var(--accent-color, var(--gold-bright));
+}
+.post-title {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--star-white);
+  margin-bottom: 12px;
+}
+.post-excerpt {
+  font-size: 0.85rem;
+  line-height: 1.85;
+  color: rgba(232,228,240,0.5);
+  font-weight: 300;
+  margin-bottom: 22px;
+}
+.post-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.2em;
+  color: rgba(232,228,240,0.3);
+  padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+.post-meta .read-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent-color, var(--gold-bright));
+  transition: gap 0.3s;
+}
+.post-card:hover .read-more { gap: 12px; }
+.post-soon {
+  opacity: 0.5;
+  pointer-events: none;
+  position: relative;
+}
+.post-soon::after {
+  content: 'COMING SOON';
+  position: absolute;
+  top: 16px; right: 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.5rem;
+  letter-spacing: 0.3em;
+  color: var(--gold-dim);
+  border: 1px solid rgba(240,192,64,0.25);
+  padding: 3px 8px;
+  border-radius: 100px;
+}
+.return-home {
+  position: fixed;
+  top: 80px; left: 5vw;
+  z-index: 200;
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: rgba(10,10,26,0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(240,192,64,0.2);
+  border-radius: 100px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  color: var(--gold-bright);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.return-home.show { display: inline-flex; }
+.return-home:hover {
+  background: rgba(240,192,64,0.1);
+  border-color: var(--gold-bright);
+}
+
 @media (max-width: 768px) {
   .cosmos-grid { grid-template-columns: 1fr; }
   .cc4, .cc5 { grid-column: auto; }
@@ -718,8 +1265,9 @@ footer {
   footer { flex-direction: column; text-align: center; }
   .social-orbit { gap: 14px; }
   .social-link { min-width: 120px; padding: 20px 22px; }
-  .topbar-links a span { display: none; }
   .footer-center { gap: 14px; }
+  .blog-about-grid { grid-template-columns: 1fr; gap: 30px; }
+  .return-home { left: 50%; transform: translateX(-50%); top: 70px; }
 }
 </style>
 </head>
@@ -727,18 +1275,37 @@ footer {
 
 <div class="grain"></div>
 
-<!-- Loading -->
+<!-- 初始加载 -->
 <div class="loading-screen" id="loader">
   <div class="loading-ring"></div>
   <div class="loading-text">星辰加载中…</div>
 </div>
 
+<!-- 2D 常态星空背景 -->
 <canvas id="cosmos"></canvas>
 
-<div class="page">
+<!-- 跃迁前的加载提示 (iframe 加载时显示) -->
+<div class="warp-loader" id="warp-loader">
+  <div class="loader-title">曲率引擎预热中</div>
+  <div class="loader-sub">CURVATURE ENGINE PRE-IGNITION</div>
+  <div class="loader-bar"><div></div></div>
+</div>
 
-  <!-- Top Bar -->
-  <nav class="topbar">
+<!-- 跃迁舞台 (iframe 嵌入 One-Body 原版) -->
+<div class="warp-stage" id="warp-stage"></div>
+
+<!-- 跳过按钮 -->
+<button class="warp-skip" id="warp-skip" type="button">⏵ SKIP · 跳过跃迁</button>
+
+<!-- 抵达瞬间的全屏白光 -->
+<div class="warp-flash" id="warp-flash"></div>
+
+<!-- ═════════════════════════════════════════════
+     页面主内容 (公告页)
+     ═════════════════════════════════════════════ -->
+<div class="page" id="page">
+
+  <nav class="topbar" id="topbar">
     <div class="topbar-logo">昨夜星辰</div>
     <div class="topbar-links">
       <a href="https://github.com/DreamStar1996" target="_blank" title="GitHub"><svg viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg></a>
@@ -748,7 +1315,6 @@ footer {
     </div>
   </nav>
 
-  <!-- Hero -->
   <section class="hero">
     <div class="hero-nebula"></div>
     <div class="hero-test-badge">✦ 测试页 · TEST PAGE ✦</div>
@@ -757,21 +1323,40 @@ footer {
     <div class="hero-divider"></div>
     <p class="hero-author">昨夜星辰 - 锦春来</p>
     <p class="hero-date">2026.03.01</p>
+
+    <div class="warp-cta-wrap">
+      <button class="warp-cta" id="warp-cta-hero" type="button">
+        <span class="warp-cta-icon"></span>
+        启动曲率引擎
+      </button>
+      <div class="warp-cta-hint">PREVIEW BLOG · 抢先预览博客 · 致敬《三体》水滴</div>
+    </div>
+
     <div class="scroll-indicator">
       <span>SCROLL</span>
       <div class="line"></div>
     </div>
   </section>
 
-  <!-- Announcement -->
   <section class="announce-section">
     <div class="announce-card" data-reveal>
       <div class="announce-icon">📡</div>
-      <h2 class="announce-title">博客重启公告</h2>
+      <h2 class="announce-title">博客重启公告 · 即将完成</h2>
       <div class="announce-body">
-        <strong>2021年</strong>创作博客，因工作原因年久失修。将在<span class="highlight"> 2026年 </span>重新启动博客设计，目前展示的是演示页。<br><br>
-        全新博客正在设计，<strong>敬请期待……</strong><br><br>
-        五年光阴如星辰流转，曾经的文字与思考并未消散，它们如同宇宙中的暗物质——不可见，却始终存在。如今，是时候让这些沉默的星辰重新点亮了。新的博客将以全新的面貌呈现，承载过去的记忆，迎接未来的可能。
+        <span class="pulse-dot"></span><strong>2021年</strong>创作博客，因工作原因年久失修。<br>
+        将在<span class="highlight"> 2026年6月 </span>正式重启全新博客——<strong>即将完成，最终阶段</strong>。<br><br>
+        五年光阴如星辰流转，曾经的文字与思考并未消散，它们如同宇宙中的暗物质——不可见，却始终存在。如今，是时候让这些沉默的星辰重新点亮了。<br><br>
+        新的博客将以全新的面貌呈现，承载过去的记忆，迎接未来的可能。<br>
+        <strong>点击上方「启动曲率引擎」按钮，可乘三体水滴穿越至博客预览界面。</strong>
+      </div>
+      <div class="announce-progress">
+        <div class="announce-progress-label">
+          <span>BUILD PROGRESS · 制作进度</span>
+          <span class="pct" id="progress-pct">92%</span>
+        </div>
+        <div class="announce-progress-bar">
+          <div class="announce-progress-fill" id="progress-fill"></div>
+        </div>
       </div>
       <div class="announce-meta">
         <span>作者：昨夜星辰 - 锦春来</span>
@@ -780,11 +1365,9 @@ footer {
     </div>
   </section>
 
-  <!-- Timeline -->
   <section class="timeline-section">
     <p class="section-label">· JOURNEY ·</p>
     <h2 class="section-heading"><i>Starlight</i> Chronicle</h2>
-
     <div class="timeline">
       <div class="tl-item" data-reveal>
         <div class="tl-dot"></div>
@@ -813,11 +1396,9 @@ footer {
     </div>
   </section>
 
-  <!-- Features -->
   <section class="features-section">
     <p class="section-label">· CONSTELLATION ·</p>
     <h2 class="section-heading">博客 <i>星座图</i></h2>
-
     <div class="cosmos-grid">
       <div class="cosmos-card cc1" data-reveal>
         <span class="c-icon">🔭</span>
@@ -847,37 +1428,30 @@ footer {
     </div>
   </section>
 
-  <!-- Quote -->
   <section class="quote-section" data-reveal>
-    <blockquote>
-      仰望星空的人<br>终将成为星辰
-    </blockquote>
+    <blockquote>仰望星空的人<br>终将成为星辰</blockquote>
     <p class="quote-author">—— 昨夜星辰 - 锦春来</p>
   </section>
 
-  <!-- Social Links -->
   <section class="social-section">
     <p class="section-label">· FIND ME ·</p>
     <h2 class="section-heading">星际 <i>坐标</i></h2>
-
     <div class="social-orbit">
-      <a href="https://github.com/DreamStar1996" target="_blank" class="social-link gh" data-reveal>
+      <a href="https://github.com/DreamStar1996" target="_blank" class="social-link" data-reveal>
         <div class="social-icon">
           <svg viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
         </div>
         <span class="social-name">GitHub</span>
         <span class="social-id">@DreamStar1996</span>
       </a>
-
-      <a href="https://gitee.com/Weichen961108" target="_blank" class="social-link ge" data-reveal>
+      <a href="https://gitee.com/Weichen961108" target="_blank" class="social-link" data-reveal>
         <div class="social-icon" style="color:#d43030">
           <svg viewBox="0 0 24 24"><path d="M11.984 0A12 12 0 000 12a12 12 0 0012 12 12 12 0 0012-12A12 12 0 0012 0zm6.09 5.333c.328 0 .593.266.592.593v1.482a.594.594 0 01-.593.592H9.777c-.982 0-1.778.796-1.778 1.778v5.63c0 .329.267.593.593.593h5.19c.329 0 .593-.264.593-.593v-1.482a.593.593 0 00-.593-.592h-3.112a.593.593 0 01-.593-.593V9.778c0-.329.266-.593.593-.593h7.999z"/></svg>
         </div>
         <span class="social-name">Gitee</span>
         <span class="social-id">@Weichen961108</span>
       </a>
-
-      <a href="https://www.foreverblog.cn" target="_blank" class="social-link fb" data-reveal>
+      <a href="https://www.foreverblog.cn" target="_blank" class="social-link" data-reveal>
         <div class="social-icon" style="color:var(--nebula-cyan)">
           <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95.49-7.4-2.42-7.93-6.36-.52-3.82 1.93-7.36 5.66-8.23v2.1A5.98 5.98 0 006 12c0 3.31 2.69 6 6 6 .34 0 .67-.03 1-.08v1.01zm2-1.01v-2.1A5.98 5.98 0 0018 12c0-3.31-2.69-6-6-6-.34 0-.67.03-1 .08V4.07c3.95-.49 7.4 2.42 7.93 6.36.52 3.82-1.93 7.36-5.93 8.49z"/></svg>
         </div>
@@ -887,29 +1461,20 @@ footer {
     </div>
   </section>
 
-  <!-- Coming Soon -->
   <section class="coming-section">
-    <div class="coming-badge">LAUNCHING SOON</div>
-    <h2 class="coming-title">全新博客，<span>即将上线</span></h2>
+    <div class="coming-badge">LAUNCHING SOON · 即将上线</div>
+    <h2 class="coming-title">全新博客，<span>即将完成</span></h2>
     <p class="coming-desc">我们正在打磨每一个像素、雕刻每一行代码。<br>全新的「昨夜星辰」博客，值得你的期待。</p>
     <div class="countdown-row">
-      <div class="cd-item">
-        <div class="cd-num" id="cd-days">--</div>
-        <div class="cd-label">DAYS</div>
-      </div>
-      <div class="cd-item">
-        <div class="cd-num" id="cd-hours">--</div>
-        <div class="cd-label">HOURS</div>
-      </div>
-      <div class="cd-item">
-        <div class="cd-num" id="cd-mins">--</div>
-        <div class="cd-label">MINS</div>
-      </div>
-      <div class="cd-item">
-        <div class="cd-num" id="cd-secs">--</div>
-        <div class="cd-label">SECS</div>
-      </div>
+      <div class="cd-item"><div class="cd-num" id="cd-days">--</div><div class="cd-label">DAYS</div></div>
+      <div class="cd-item"><div class="cd-num" id="cd-hours">--</div><div class="cd-label">HOURS</div></div>
+      <div class="cd-item"><div class="cd-num" id="cd-mins">--</div><div class="cd-label">MINS</div></div>
+      <div class="cd-item"><div class="cd-num" id="cd-secs">--</div><div class="cd-label">SECS</div></div>
     </div>
+    <button class="coming-cta" id="warp-cta-bottom" type="button">
+      <span class="coming-cta-icon"></span>
+      抢先穿越 · 进入博客预览
+    </button>
   </section>
 
   <footer>
@@ -924,13 +1489,112 @@ footer {
 
 </div>
 
+<!-- ═════════════════════════════════════════════
+     抵达后的博客预览界面
+     ═════════════════════════════════════════════ -->
+<div class="blog-arrived" id="blog-arrived">
+  <section class="blog-hero">
+    <div class="blog-hero-badge">ARRIVED · 抵达目的地</div>
+    <h1 class="blog-hero-title">昨夜星辰 · 博客</h1>
+    <p class="blog-hero-sub">A Personal Universe of Code, Design & Thoughts</p>
+    <div class="blog-hero-divider"></div>
+    <p class="blog-hero-intro">
+      这里是「锦春来」的数字栖息地。一个记录技术探索、设计思考与生活感悟的私人宇宙。<br>
+      博客重启进入最终阶段，以下是即将上线的内容预览。
+    </p>
+  </section>
+
+  <section class="blog-about">
+    <div class="blog-about-grid">
+      <div class="blog-about-left">
+        <div class="label">· ABOUT ·</div>
+        <h3>关于<i> 这片星空</i></h3>
+        <p>
+          昨夜星辰，是 2021 年播下的种子。它曾在喧嚣的工作年月里沉默如暗物质，却始终在宇宙背景中辐射。<br><br>
+          2026 年重启，是写给五年前自己的回信——以更冷静的笔触、更克制的设计、更长远的视角，重新书写代码与生活。<br><br>
+          这里没有热搜与流量，只有思考、记录、与时间共振的星光。
+        </p>
+      </div>
+      <div class="blog-about-right">
+        <div class="about-stat"><span class="stat-label">CREATED · 创立</span><span class="stat-value">2021</span></div>
+        <div class="about-stat"><span class="stat-label">CATEGORIES · 分类</span><span class="stat-value">5<sup>星座</sup></span></div>
+        <div class="about-stat"><span class="stat-label">PROGRESS · 进度</span><span class="stat-value">92<sup>%</sup></span></div>
+        <div class="about-stat"><span class="stat-label">LAUNCH · 上线</span><span class="stat-value">2026.06</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="blog-posts">
+    <div class="blog-posts-head">
+      <h2>最新 <i>文章</i> · Recent Posts</h2>
+      <div class="post-count">TOTAL <b>06</b> / PREVIEW</div>
+    </div>
+    <div class="post-list">
+      <div class="post-card" data-cat="tech">
+        <div class="post-cat">技术深空 · TECH</div>
+        <div class="post-title">致敬《三体》:三体水滴与曲率引擎的前端实现</div>
+        <div class="post-excerpt">本页点击「启动曲率引擎」后看到的穿梭动画,来自 One-Body 这个开源项目。从星空粒子到曲率隧道,本文拆解其 Three.js 实现细节。</div>
+        <div class="post-meta"><span>2026.03.15 · 8 min</span><span class="read-more">READ →</span></div>
+      </div>
+      <div class="post-card" data-cat="design">
+        <div class="post-cat">设计星云 · DESIGN</div>
+        <div class="post-title">编辑式美学:让博客像一本杂志而不是一个 Feed</div>
+        <div class="post-excerpt">为什么我们都厌倦了千篇一律的卡片瀑布流?本文从 The New Yorker、Pitchfork、Are.na 中找寻答案,重新思考博客的版式语言。</div>
+        <div class="post-meta"><span>2026.03.10 · 6 min</span><span class="read-more">READ →</span></div>
+      </div>
+      <div class="post-card" data-cat="thoughts">
+        <div class="post-cat">灵感彗星 · THOUGHTS</div>
+        <div class="post-title">五年沉默后,重新开始写博客这件事</div>
+        <div class="post-excerpt">2021 到 2026,从激情到沉寂再到重启。一些关于持续创作、个人品牌与中年程序员的真心话。</div>
+        <div class="post-meta"><span>2026.03.01 · 5 min</span><span class="read-more">READ →</span></div>
+      </div>
+      <div class="post-card post-soon" data-cat="life">
+        <div class="post-cat">生活行星 · LIFE</div>
+        <div class="post-title">在 32 岁,我开始记录每一颗看见的星</div>
+        <div class="post-excerpt">从北京到苏州,从工位到阳台。一份关于通勤、阅读、星空与晚饭的记录手账。</div>
+        <div class="post-meta"><span>—— · —— min</span><span class="read-more">SOON →</span></div>
+      </div>
+      <div class="post-card post-soon" data-cat="tech">
+        <div class="post-cat">技术深空 · TECH</div>
+        <div class="post-title">从零搭建一个极简的、可持续维护的博客系统</div>
+        <div class="post-excerpt">Astro + MDX + 自托管图床。一份偏执狂的 Setup 笔记,只为五年后还能跑起来。</div>
+        <div class="post-meta"><span>—— · —— min</span><span class="read-more">SOON →</span></div>
+      </div>
+      <div class="post-card post-soon" data-cat="design">
+        <div class="post-cat">开源银河 · OPEN</div>
+        <div class="post-title">Stellaria — 我开源的下一个小工具</div>
+        <div class="post-excerpt">敬请期待。</div>
+        <div class="post-meta"><span>—— · —— min</span><span class="read-more">SOON →</span></div>
+      </div>
+    </div>
+  </section>
+
+  <footer style="margin-top: 40px;">
+    <div class="footer-left">✦ 昨夜星辰 - 锦春来</div>
+    <div class="footer-center">
+      <a href="https://github.com/DreamStar1996" target="_blank"><svg viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>GitHub</a>
+    </div>
+    <div class="footer-right">© 2021 — 2026 · 此为预览,正式上线请等待倒计时归零</div>
+  </footer>
+</div>
+
+<button class="return-home" id="return-home" type="button">← 返回公告页</button>
+
 <script>
-// ═══════ LOADING ═══════
+/* ═══════════════════════════════════════════════════════
+   LOADING
+   ═══════════════════════════════════════════════════════ */
 window.addEventListener('load', () => {
   setTimeout(() => document.getElementById('loader').classList.add('hidden'), 800);
+  setTimeout(() => {
+    const fill = document.getElementById('progress-fill');
+    if (fill) fill.style.width = '92%';
+  }, 1200);
 });
 
-// ═══════ COSMOS CANVAS ═══════
+/* ═══════════════════════════════════════════════════════
+   2D 常态星空 (背景)
+   ═══════════════════════════════════════════════════════ */
 const canvas = document.getElementById('cosmos');
 const ctx = canvas.getContext('2d');
 let W, H, scrollY = 0, mouseX = 0, mouseY = 0;
@@ -944,7 +1608,6 @@ window.addEventListener('resize', resize);
 window.addEventListener('scroll', () => scrollY = window.scrollY);
 window.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
 
-// Stars
 const starColors = ['#e8e4f0','#f0c040','#3ecfcf','#d4567a','#7b5ea7'];
 const stars = Array.from({ length: 500 }, () => ({
   x: Math.random() * 3000 - 500,
@@ -956,8 +1619,6 @@ const stars = Array.from({ length: 500 }, () => ({
   color: starColors[Math.floor(Math.random() * 5)],
   colorProb: Math.random()
 }));
-
-// Nebula clouds
 const nebulae = Array.from({ length: 12 }, () => ({
   x: Math.random() * 2000 - 200,
   y: Math.random() * 6000,
@@ -967,10 +1628,8 @@ const nebulae = Array.from({ length: 12 }, () => ({
   phase: Math.random() * Math.PI * 2
 }));
 
-function draw() {
+function draw2D() {
   ctx.clearRect(0, 0, W, H);
-
-  // Nebulae
   nebulae.forEach(n => {
     n.phase += 0.002;
     const ny = n.y - scrollY * n.speed;
@@ -982,27 +1641,20 @@ function draw() {
     ctx.fillStyle = grad;
     ctx.fillRect(((n.x%W)+W)%W - n.r, drawY - n.r, n.r * 2, n.r * 2);
   });
-
-  // Stars
   stars.forEach(s => {
     s.phase += s.twinkleSpeed;
-    const opacity = s.colorProb > 0.85
-      ? 0.4 + Math.sin(s.phase) * 0.5
-      : 0.15 + Math.sin(s.phase) * 0.35;
+    const opacity = s.colorProb > 0.85 ? 0.4 + Math.sin(s.phase) * 0.5 : 0.15 + Math.sin(s.phase) * 0.35;
     const sy = (s.y - scrollY * s.speed) % 4000;
     const drawY = sy < 0 ? sy + 4000 : sy;
     if (drawY > H + 10) return;
-
     const col = s.colorProb > 0.92 ? s.color : '#e8e4f0';
     const sx = ((s.x % W) + W) % W;
-
     ctx.beginPath();
     ctx.arc(sx, drawY, s.r, 0, Math.PI * 2);
     ctx.fillStyle = col;
     ctx.globalAlpha = Math.max(0, opacity);
     ctx.fill();
     ctx.globalAlpha = 1;
-
     if (s.r > 1.5 && opacity > 0.5) {
       const g = ctx.createRadialGradient(sx, drawY, 0, sx, drawY, s.r * 4);
       g.addColorStop(0, col.includes('#') ? col + '18' : col);
@@ -1013,8 +1665,6 @@ function draw() {
       ctx.fill();
     }
   });
-
-  // Mouse glow
   if (mouseX && mouseY) {
     const grad = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 120);
     grad.addColorStop(0, 'rgba(240,192,64,0.015)');
@@ -1022,12 +1672,10 @@ function draw() {
     ctx.fillStyle = grad;
     ctx.fillRect(mouseX - 120, mouseY - 120, 240, 240);
   }
-
-  requestAnimationFrame(draw);
+  requestAnimationFrame(draw2D);
 }
-draw();
+draw2D();
 
-// ═══════ SHOOTING STARS ═══════
 function createShootingStar() {
   const star = document.createElement('div');
   star.className = 'shooting-star';
@@ -1040,7 +1688,6 @@ function createShootingStar() {
 setInterval(createShootingStar, 4000 + Math.random() * 3000);
 setTimeout(createShootingStar, 2000);
 
-// ═══════ SCROLL REVEAL ═══════
 const revealEls = document.querySelectorAll('[data-reveal]');
 const observer = new IntersectionObserver((entries) => {
   entries.forEach((entry, i) => {
@@ -1052,7 +1699,6 @@ const observer = new IntersectionObserver((entries) => {
 }, { threshold: 0.15 });
 revealEls.forEach(el => observer.observe(el));
 
-// ═══════ COUNTDOWN (target: 2026-06-01) ═══════
 const target = new Date('2026-06-01T00:00:00').getTime();
 function updateCountdown() {
   const now = Date.now();
@@ -1068,6 +1714,187 @@ function updateCountdown() {
 }
 updateCountdown();
 setInterval(updateCountdown, 1000);
+
+
+/* ═══════════════════════════════════════════════════════
+   曲率引擎跃迁 - 嵌入 One-Body 原版 (iframe)
+   通过 contentWindow 的 jQuery 自动模拟点击, 推进三阶段
+   ═══════════════════════════════════════════════════════ */
+let warpInProgress = false;
+let warpIframe = null;
+let warpFinishTimeoutId = null;
+
+const stage = document.getElementById('warp-stage');
+const warpLoader = document.getElementById('warp-loader');
+const warpSkip = document.getElementById('warp-skip');
+const warpFlash = document.getElementById('warp-flash');
+
+function launchWarp() {
+  if (warpInProgress) return;
+  warpInProgress = true;
+
+  // 1. 公告页淡出 + 显示加载提示
+  document.body.classList.add('warping');
+  document.getElementById('cosmos').classList.add('dim');
+  document.getElementById('page').classList.add('hidden-during-warp');
+  document.getElementById('topbar').classList.add('fade');
+  warpLoader.classList.add('show');
+
+  // 2. 创建 iframe 加载 One-Body
+  const iframe = document.createElement('iframe');
+  iframe.src = 'warp/index.html';
+  iframe.allow = 'autoplay';
+  iframe.setAttribute('scrolling', 'no');
+  iframe.style.cssText = 'width:100%;height:100%;border:0;display:block;';
+  stage.innerHTML = '';
+  stage.appendChild(iframe);
+  warpIframe = iframe;
+
+  iframe.addEventListener('load', () => {
+    autoPlayWarp(iframe);
+  });
+
+  warpSkip.classList.add('show');
+}
+
+/* 自动播放 One-Body 三阶段 */
+function autoPlayWarp(iframe) {
+  let w;
+  try {
+    w = iframe.contentWindow;
+  } catch (e) {
+    console.error('iframe 跨源, 无法控制', e);
+    finishWarp();
+    return;
+  }
+
+  // 等 jQuery 和 ship-info-btn 都就绪 (One-Body 加载完所有贴图后才出现按钮)
+  waitFor(
+    () => w.$ && w.$('#ship-info-btn').length && w.$('#ship-info-btn').hasClass('show'),
+    () => {
+      // ▶ 第 1 阶段: 点击「启动」(type=1)
+      stage.classList.add('show');
+      warpLoader.classList.remove('show');
+
+      w.$('#ship-info-btn').trigger('click');
+
+      // 等到 type 变 2 ("起航" 按钮出现) - One-Body 内部约 7s
+      waitFor(
+        () => Number(w.$('#ship-info-btn').data('type')) === 2 && w.$('#ship-info-btn').hasClass('show'),
+        () => {
+          // ▶ 第 2 阶段: 点击「起航」(type=2 -> show2 常规推进 4s)
+          setTimeout(() => {
+            w.$('#ship-info-btn').trigger('click');
+
+            // show2 完成 + buffer 后, 跳过 One-Body 内部 10s 等待, 强行进入 type=3
+            setTimeout(() => {
+              w.$('#ship-info-btn').data('type', 3).addClass('show');
+              setTimeout(() => {
+                // ▶ 第 3 阶段: 点击「开始星际穿梭」(type=3 -> show3 曲率跃迁)
+                w.$('#ship-info-btn').trigger('click');
+
+                // 等约 6s 让 showType 进入 4 (故障特效) 然后 5 (高速线段稳定)
+                warpFinishTimeoutId = setTimeout(() => {
+                  finishWarp();
+                }, 6500);
+              }, 200);
+            }, 5200);
+          }, 600);
+        },
+        15000
+      );
+    },
+    25000
+  );
+}
+
+/* 等待条件成立, 超时后回退 */
+function waitFor(cond, cb, timeout) {
+  const start = performance.now();
+  const tick = () => {
+    let ok = false;
+    try { ok = cond(); } catch (e) {}
+    if (ok) return cb();
+    if (performance.now() - start > (timeout || 20000)) {
+      console.warn('waitFor timeout, 直接结束跃迁');
+      return finishWarp();
+    }
+    setTimeout(tick, 120);
+  };
+  tick();
+}
+
+/* 跃迁结束 - 白光闪 + 切到博客 */
+function finishWarp() {
+  if (!warpInProgress) return;
+  warpSkip.classList.remove('show');
+
+  // 白光闪烁
+  warpFlash.style.transition = 'none';
+  warpFlash.style.opacity = '0';
+  requestAnimationFrame(() => {
+    warpFlash.style.transition = 'opacity 0.28s ease-out';
+    warpFlash.style.opacity = '1';
+    setTimeout(() => {
+      // 切换页面 (在白光最亮时切换, 隐藏切换过程)
+      stage.classList.remove('show');
+      warpLoader.classList.remove('show');
+      document.body.classList.remove('warping');
+      document.body.classList.add('arrived');
+      document.getElementById('page').style.display = 'none';
+      const blog = document.getElementById('blog-arrived');
+      blog.classList.add('show');
+      blog.classList.add('fade-in');
+      document.getElementById('return-home').classList.add('show');
+      window.scrollTo({ top: 0 });
+
+      // 白光淡出
+      warpFlash.style.transition = 'opacity 0.95s ease-in';
+      warpFlash.style.opacity = '0';
+
+      // 销毁 iframe (释放 GPU/内存)
+      setTimeout(() => {
+        if (warpIframe && warpIframe.parentNode) {
+          // 静音
+          try {
+            const w = warpIframe.contentWindow;
+            if (w && w.document) {
+              const audio = w.document.getElementById('audio');
+              if (audio) { audio.pause(); audio.src = ''; }
+            }
+          } catch (e) {}
+          warpIframe.parentNode.removeChild(warpIframe);
+          warpIframe = null;
+        }
+        warpInProgress = false;
+      }, 1200);
+    }, 290);
+  });
+}
+
+/* 返回公告页 */
+function returnHome() {
+  document.body.classList.remove('arrived');
+  const blog = document.getElementById('blog-arrived');
+  blog.classList.remove('show');
+  blog.classList.remove('fade-in');
+  document.getElementById('return-home').classList.remove('show');
+  document.getElementById('page').style.display = '';
+  document.getElementById('page').classList.remove('hidden-during-warp');
+  document.getElementById('cosmos').classList.remove('dim');
+  document.getElementById('topbar').classList.remove('fade');
+  window.scrollTo({ top: 0 });
+}
+
+/* 事件绑定 */
+document.getElementById('warp-cta-hero').addEventListener('click', launchWarp);
+document.getElementById('warp-cta-bottom').addEventListener('click', launchWarp);
+document.getElementById('return-home').addEventListener('click', returnHome);
+warpSkip.addEventListener('click', () => {
+  if (warpFinishTimeoutId) clearTimeout(warpFinishTimeoutId);
+  finishWarp();
+});
+
 </script>
 </body>
 </html>
