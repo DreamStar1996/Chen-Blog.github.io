@@ -1,4 +1,3 @@
-```markdown
 # 🌌 昨夜星辰 · 博客 (Stellaria Blog)
 
 > **浩瀚宇宙，广袤星辰** | A Personal Universe of Code, Design & Thoughts
@@ -69,7 +68,6 @@ stellaria-blog/
 │   ├── editorial-aesthetic.md
 │   └── five-years-thoughts.md
 └── README.md
-```
 
 ## 🤝 贡献与联系
 
