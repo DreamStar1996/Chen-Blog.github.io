@@ -1142,3 +1142,95 @@ function next() {
   $("#music-name").text(musics[musicNow].title);
   if(audio.src && audio.src !== location.href && audio.src !== "") { audio.play().catch(function(){}); }
 }
+
+/* ═══════════════════════════════════════════════════════
+   ▼ 父页面通信 / 自动播放（用于 file:// 直接打开场景）
+   监听父页面 postMessage 或 URL 锚点 #autoplay，自行驱动
+   三阶段跃迁，并通过 postMessage 把进度回传父页面
+   ═══════════════════════════════════════════════════════ */
+(function () {
+  var autoStarted = false;
+  var readyNotified = false;
+
+  function waitUntil(cond, cb, timeout) {
+    var start = Date.now();
+    (function tick() {
+      var ok = false;
+      try { ok = cond(); } catch (e) {}
+      if (ok) return cb();
+      if (Date.now() - start > (timeout || 25000)) return cb(); // 超时也继续
+      setTimeout(tick, 120);
+    })();
+  }
+
+  function notifyParent(evt, extra) {
+    try {
+      if (window.parent && window.parent !== window) {
+        var msg = { source: "warp", event: evt };
+        if (extra) for (var k in extra) msg[k] = extra[k];
+        window.parent.postMessage(msg, "*");
+      }
+    } catch (e) {}
+  }
+
+  // 场景就绪（首个按钮出现）后立即通知父页面
+  waitUntil(
+    function () { return window.$ && $("#ship-info-btn").length && $("#ship-info-btn").hasClass("show"); },
+    function () { if (!readyNotified) { readyNotified = true; notifyParent("ready"); } },
+    25000
+  );
+
+  function startAutoWarp() {
+    if (autoStarted) return;
+    autoStarted = true;
+
+    waitUntil(
+      function () { return window.$ && $("#ship-info-btn").length && $("#ship-info-btn").hasClass("show"); },
+      function () {
+        // 阶段 1：启动
+        $("#ship-info-btn").trigger("click");
+
+        waitUntil(
+          function () { return Number($("#ship-info-btn").data("type")) === 2 && $("#ship-info-btn").hasClass("show"); },
+          function () {
+            setTimeout(function () {
+              // 阶段 2：起航（常规推进）
+              $("#ship-info-btn").trigger("click");
+
+              setTimeout(function () {
+                // 跳过内部 10s 等待，强行进入阶段 3
+                $("#ship-info-btn").data("type", 3).addClass("show");
+                setTimeout(function () {
+                  // 阶段 3：曲率跃迁
+                  $("#ship-info-btn").trigger("click");
+                  setTimeout(function () { notifyParent("finished"); }, 6500);
+                }, 200);
+              }, 5200);
+            }, 600);
+          },
+          15000
+        );
+      },
+      25000
+    );
+  }
+
+  function stopAudio() {
+    try {
+      var audio = document.getElementById("audio");
+      if (audio) { audio.pause(); audio.src = ""; }
+    } catch (e) {}
+  }
+
+  window.addEventListener("message", function (e) {
+    var d = e && e.data;
+    if (!d || d.target !== "warp") return;
+    if (d.action === "start") startAutoWarp();
+    else if (d.action === "stop-audio") stopAudio();
+  });
+
+  // 若 URL 带 #autoplay，则直接启动（不依赖父页面 postMessage）
+  if (String(location.hash || "").indexOf("autoplay") !== -1) {
+    startAutoWarp();
+  }
+})();

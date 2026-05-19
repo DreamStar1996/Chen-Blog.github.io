@@ -1741,8 +1741,10 @@ function launchWarp() {
   warpLoader.classList.add('show');
 
   // 2. 创建 iframe 加载 One-Body
+  // 使用 #autoplay 锚点让 iframe 内部自行驱动跃迁动画 +
+  // 通过 postMessage 与父页面通信，避免 file:// 协议下的跨源限制
   const iframe = document.createElement('iframe');
-  iframe.src = 'warp/index.html';
+  iframe.src = 'warp/index.html#autoplay';
   iframe.allow = 'autoplay';
   iframe.setAttribute('scrolling', 'no');
   iframe.style.cssText = 'width:100%;height:100%;border:0;display:block;';
@@ -1750,79 +1752,30 @@ function launchWarp() {
   stage.appendChild(iframe);
   warpIframe = iframe;
 
-  iframe.addEventListener('load', () => {
-    autoPlayWarp(iframe);
-  });
-
   warpSkip.classList.add('show');
+
+  // 安全兜底：若 35s 内仍未收到 finished 事件，则强制结束
+  warpFinishTimeoutId = setTimeout(() => {
+    console.warn('warp 超时未完成, 强制结束跃迁');
+    finishWarp();
+  }, 35000);
 }
 
-/* 自动播放 One-Body 三阶段 */
-function autoPlayWarp(iframe) {
-  let w;
-  try {
-    w = iframe.contentWindow;
-  } catch (e) {
-    console.error('iframe 跨源, 无法控制', e);
-    finishWarp();
-    return;
-  }
-
-  // 等 jQuery 和 ship-info-btn 都就绪 (One-Body 加载完所有贴图后才出现按钮)
-  waitFor(
-    () => w.$ && w.$('#ship-info-btn').length && w.$('#ship-info-btn').hasClass('show'),
-    () => {
-      // ▶ 第 1 阶段: 点击「启动」(type=1)
+/* 监听 iframe 通过 postMessage 上报的事件 */
+window.addEventListener('message', (e) => {
+  const d = e && e.data;
+  if (!d || d.source !== 'warp') return;
+  if (d.event === 'ready') {
+    // 场景已就绪 → 展示舞台并隐藏加载提示
+    if (warpInProgress) {
       stage.classList.add('show');
       warpLoader.classList.remove('show');
-
-      w.$('#ship-info-btn').trigger('click');
-
-      // 等到 type 变 2 ("起航" 按钮出现) - One-Body 内部约 7s
-      waitFor(
-        () => Number(w.$('#ship-info-btn').data('type')) === 2 && w.$('#ship-info-btn').hasClass('show'),
-        () => {
-          // ▶ 第 2 阶段: 点击「起航」(type=2 -> show2 常规推进 4s)
-          setTimeout(() => {
-            w.$('#ship-info-btn').trigger('click');
-
-            // show2 完成 + buffer 后, 跳过 One-Body 内部 10s 等待, 强行进入 type=3
-            setTimeout(() => {
-              w.$('#ship-info-btn').data('type', 3).addClass('show');
-              setTimeout(() => {
-                // ▶ 第 3 阶段: 点击「开始星际穿梭」(type=3 -> show3 曲率跃迁)
-                w.$('#ship-info-btn').trigger('click');
-
-                // 等约 6s 让 showType 进入 4 (故障特效) 然后 5 (高速线段稳定)
-                warpFinishTimeoutId = setTimeout(() => {
-                  finishWarp();
-                }, 6500);
-              }, 200);
-            }, 5200);
-          }, 600);
-        },
-        15000
-      );
-    },
-    25000
-  );
-}
-
-/* 等待条件成立, 超时后回退 */
-function waitFor(cond, cb, timeout) {
-  const start = performance.now();
-  const tick = () => {
-    let ok = false;
-    try { ok = cond(); } catch (e) {}
-    if (ok) return cb();
-    if (performance.now() - start > (timeout || 20000)) {
-      console.warn('waitFor timeout, 直接结束跃迁');
-      return finishWarp();
     }
-    setTimeout(tick, 120);
-  };
-  tick();
-}
+  } else if (d.event === 'finished') {
+    if (warpFinishTimeoutId) { clearTimeout(warpFinishTimeoutId); warpFinishTimeoutId = null; }
+    finishWarp();
+  }
+});
 
 /* 跃迁结束 - 白光闪 + 切到博客 */
 function finishWarp() {
@@ -1855,12 +1808,10 @@ function finishWarp() {
       // 销毁 iframe (释放 GPU/内存)
       setTimeout(() => {
         if (warpIframe && warpIframe.parentNode) {
-          // 静音
+          // 通过 postMessage 让 iframe 内部停止音频 (避免 file:// 跨源问题)
           try {
-            const w = warpIframe.contentWindow;
-            if (w && w.document) {
-              const audio = w.document.getElementById('audio');
-              if (audio) { audio.pause(); audio.src = ''; }
+            if (warpIframe.contentWindow) {
+              warpIframe.contentWindow.postMessage({ target: 'warp', action: 'stop-audio' }, '*');
             }
           } catch (e) {}
           warpIframe.parentNode.removeChild(warpIframe);
