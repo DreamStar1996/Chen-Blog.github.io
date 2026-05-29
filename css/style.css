@@ -36,9 +36,13 @@
   --grain-op:.05;
   --card-shadow:0 22px 56px -28px rgba(0,0,0,.8);
 
-  --serif-disp:'Cormorant Garamond','Noto Serif SC',serif;
-  --serif-cjk:'Noto Serif SC','Cormorant Garamond',serif;
-  --sans:'Noto Sans SC','Helvetica Neue',sans-serif;
+  /* 字体：中文统一改为「楷体」——首选霞鹜文楷 LXGW WenKai（webfont），
+     再降级到系统楷体（楷体 / KaiTi / STKaiti / 标楷体），最后 serif 兜底。
+     拉丁标题仍用 Cormorant Garamond，与楷体的书法笔意相得益彰。 */
+  --kai:'LXGW WenKai','楷体','KaiTi','STKaiti','BiauKai','华文楷体',serif;
+  --serif-disp:'Cormorant Garamond', var(--kai);
+  --serif-cjk:var(--kai);
+  --sans:var(--kai);
   --mono:'Space Mono',ui-monospace,monospace;
 }
 
@@ -73,21 +77,24 @@
 }
 
 *{margin:0;padding:0;box-sizing:border-box}
-/* 整体放大字号（再次上调：原 16px → 现 ~18.5–21px；随视口轻微伸缩，小屏回落避免溢出）
+/* 整体字号（这一版再小一码：上一版 18.5–21px → 现 17.5–20px；随视口轻微伸缩）
    —— 想整体调大 / 调小，只改这一处的三个数字即可（Hexo 迁移后可挂到 _config 字段）。 */
 html{
   scroll-behavior:smooth;
-  font-size:clamp(18.5px, 0.52vw + 16.6px, 21px);
+  font-size:clamp(17.5px, 0.5vw + 15.7px, 20px);
 }
-@media (max-width:520px){ html{ font-size:18px } }
+@media (max-width:520px){ html{ font-size:17px } }
 body{
   background:var(--page-bg);
   color:var(--star);
   font-family:var(--sans);
   font-size:1rem;
-  line-height:1.7;
+  line-height:1.85;            /* 楷体笔画舒展，行距略增更透气 */
+  font-weight:400;
+  letter-spacing:.01em;
   overflow-x:hidden;
   -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
   transition:color .8s ease;
 }
 body.warping{overflow:hidden}
@@ -978,3 +985,95 @@ body.warping .bg-switch{opacity:0;pointer-events:none}
 .timeline{ max-width:760px }         /* 时间线：700 → 760，温和 */
 .quote-section blockquote{ max-width:760px }  /* 引言：680 → 760 */
 .coming-desc{ max-width:660px }      /* 即将上线文案：580 → 660 */
+
+/* ════════════════════════════════════════════════════════════════
+   响应式排版 · 统一加强（桌面 / 平板 / 手机三档，集中收口）
+   —— 在既有零散断点之上补齐「平板中间档」，并按屏幕逐级收紧字号、
+      间距与网格列数；本层置于文件末尾，确保优先级胜出。
+   断点：1100（窄桌面/横屏平板）· 820（竖屏平板）· 560（大手机）· 400（小手机）
+   ════════════════════════════════════════════════════════════════ */
+
+/* —— 窄桌面 / 横屏平板（≤1100px） —— */
+@media (max-width:1100px){
+  /* 星座卡：3 列 → 2 列（此前在 768 才收，平板上太挤/太空之间缺一档） */
+  .cosmos-grid{grid-template-columns:repeat(2,1fr);max-width:760px}
+  .cc4,.cc5{grid-column:auto}
+  /* 近期手记：网格自适应已够稳，这里只压一下卡片最小宽 */
+  .post-list{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+  /* 精选大卡 / 今夜面板：提前到 1100 收成单列，避免左右过窄 */
+  .feat-card{grid-template-columns:1fr}
+  .tonight-section{grid-template-columns:1fr;gap:34px}
+  .sky-grid{grid-template-columns:repeat(2,1fr)}
+  .links-grid{grid-template-columns:repeat(2,1fr)}
+  .blog-foot-grid{grid-template-columns:1fr 1fr;gap:32px}
+  .bf-brand{grid-column:1 / -1}
+}
+
+/* —— 竖屏平板（≤820px） —— */
+@media (max-width:820px){
+  /* 标题阶梯整体下调一档，避免大标题在中屏换行难看 */
+  .blog-hero-title{font-size:clamp(2.4rem,9vw,3.6rem)}
+  .section-heading{font-size:clamp(1.8rem,6vw,2.6rem);margin-bottom:46px}
+  .blog-arrived .sec-head{margin-bottom:36px}
+  .blog-arrived .sec-head h2{font-size:clamp(1.8rem,5.6vw,2.5rem)}
+  /* 双列信息区 → 单列 */
+  .blog-about-grid{grid-template-columns:1fr;gap:34px}
+  /* 精选大卡图片高度收一些，文字区留白减小 */
+  .feat-media{min-height:240px}
+  .feat-body{padding:38px 32px}
+  /* 区段竖向留白统一收紧 */
+  .featured-section,.sky-section,.tonight-section,.calendar-section,
+  .news-section,.links-section,.blog-about{padding-top:30px;padding-bottom:44px}
+  /* 友链 / 星云卡回到单列，阅读更稳 */
+  .sky-grid{grid-template-columns:1fr;gap:22px}
+  .links-grid{grid-template-columns:1fr}
+  /* 天象历：去掉右侧标签列，主信息两列 */
+  .cal-item{grid-template-columns:auto 1fr;gap:18px}
+  .cal-tag{display:none}
+  /* 顶栏导航在中屏即进入紧凑模式（若有展开菜单交由原逻辑控制） */
+  .nav-links{gap:18px}
+}
+
+/* —— 大手机（≤560px） —— */
+@media (max-width:560px){
+  /* HERO 留白与标题再收 */
+  .blog-hero{min-height:84vh;padding-top:88px}
+  .blog-hero-title{font-size:clamp(2.1rem,11vw,3rem);line-height:1.18}
+  .blog-mark{width:46px;height:46px}
+  /* 行动按钮纵向排布、整宽更好点按 */
+  .blog-hero-actions{flex-direction:column;width:100%;max-width:300px;margin-inline:auto}
+  .blog-hero-actions .btn{width:100%;justify-content:center}
+  /* 区段标题左右排布改为纵向，避免「更多」挤压 */
+  .blog-arrived .sec-head{flex-direction:column;align-items:flex-start;gap:10px}
+  .blog-arrived .sec-head .more{align-self:flex-start}
+  /* 公告卡内边距收紧、装饰大字缩小避免溢出 */
+  .announce-card{padding:30px 22px}
+  .announce-card::before{font-size:5rem}
+  /* 时间线左缩进减小 */
+  .timeline{padding-left:22px}
+  /* 今夜面板内边距收紧 */
+  .tonight{padding:26px 22px}
+  /* 友链卡更紧凑 */
+  .link-card{padding:18px 18px;gap:14px}
+  .link-avatar{width:50px;height:50px}
+  /* 订阅区内边距 */
+  .news-inner{padding:44px 24px}
+  /* 返回顶部 / 背景胶囊错开，避免重叠 */
+  .to-top{right:16px;bottom:78px;width:46px;height:46px}
+}
+
+/* —— 小手机（≤400px） —— */
+@media (max-width:400px){
+  .blog-hero-title{font-size:clamp(1.9rem,12vw,2.5rem)}
+  .blog-readout{font-size:.7rem;gap:5px 12px}
+  .topbar-logo{font-size:1.08rem}
+  .topbar-links{gap:8px}
+  .cal-date .d{font-size:1.6rem}
+  .feat-body{padding:30px 22px}
+}
+
+/* —— 触摸设备：hover 位移类效果改为更克制，避免「悬停卡住」 —— */
+@media (hover:none){
+  .link-card:hover,.sky-card:hover,.feat-card:hover,.cosmos-card:hover{transform:none}
+  .to-top:hover,.bg-switch:hover,.return-home:hover{transform:none}
+}
