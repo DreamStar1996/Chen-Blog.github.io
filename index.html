@@ -3,1277 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>昨夜星辰-锦春来 · 浩瀚宇宙，广袤星辰</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@300;400;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<style>
-:root {
-  --void: #050510;
-  --deep: #0a0a1a;
-  --nebula-blue: #1a3a5c;
-  --star-white: #e8e4f0;
-  --gold-bright: #f0c040;
-  --gold-dim: #c49b2a;
-  --nebula-pink: #d4567a;
-  --nebula-purple: #7b5ea7;
-  --nebula-cyan: #3ecfcf;
-  --cosmic-orange: #e8834a;
-}
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-
-body {
-  background: var(--void);
-  color: var(--star-white);
-  font-family: 'Noto Serif SC', serif;
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-}
-
-body.warping { overflow: hidden; }
-body.arrived { overflow-y: auto; }
-
-#cosmos {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  transition: opacity 0.8s ease;
-}
-#cosmos.dim { opacity: 0; }
-
-.grain {
-  position: fixed; inset: 0;
-  z-index: 9998;
-  pointer-events: none;
-  opacity: 0.04;
-  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 256px;
-}
-
-/* ═══════ LOADING ═══════ */
-.loading-screen {
-  position: fixed; inset: 0;
-  z-index: 10000;
-  background: var(--void);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  transition: opacity 1s ease, visibility 1s;
-}
-.loading-screen.hidden {
-  opacity: 0;
-  visibility: hidden;
-}
-.loading-ring {
-  width: 60px; height: 60px;
-  border: 2px solid rgba(240,192,64,0.1);
-  border-top-color: var(--gold-bright);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.loading-text {
-  font-family: 'Ma Shan Zheng', cursive;
-  font-size: 1.2rem;
-  color: var(--gold-dim);
-  margin-top: 20px;
-  letter-spacing: 0.3em;
-}
-
-/* ═══════ PAGE WRAPPER ═══════ */
-.page {
-  position: relative;
-  z-index: 1;
-  transition: opacity 0.8s ease, filter 0.8s ease;
-}
-.page.hidden-during-warp {
-  opacity: 0;
-  filter: blur(20px);
-  pointer-events: none;
-}
-
-/* ═══════ TOP BAR ═══════ */
-.topbar {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  z-index: 100;
-  padding: 16px 5vw;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  backdrop-filter: blur(12px);
-  background: rgba(5,5,16,0.6);
-  border-bottom: 1px solid rgba(240,192,64,0.06);
-  transition: opacity 0.6s ease;
-}
-.topbar.fade { opacity: 0; pointer-events: none; }
-.topbar-logo {
-  font-family: 'Ma Shan Zheng', cursive;
-  font-size: 1.3rem;
-  color: var(--gold-bright);
-  text-shadow: 0 0 20px rgba(240,192,64,0.3);
-}
-.topbar-links { display: flex; align-items: center; gap: 16px; }
-.topbar-links a { color: rgba(232,228,240,0.5); transition: color 0.3s; }
-.topbar-links a:hover { color: var(--gold-bright); }
-.topbar-links svg { width: 18px; height: 18px; fill: currentColor; display: block; }
-.topbar-badge {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.55rem;
-  letter-spacing: 0.25em;
-  color: var(--nebula-cyan);
-  border: 1px solid rgba(62,207,207,0.3);
-  padding: 4px 12px;
-  border-radius: 100px;
-}
-
-/* ═══════ HERO ═══════ */
-.hero {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-  padding: 80px 20px 40px;
-}
-.hero-nebula {
-  position: absolute;
-  width: 800px; height: 800px;
-  border-radius: 50%;
-  background: radial-gradient(ellipse at center,
-    rgba(123,94,167,0.12) 0%,
-    rgba(26,58,92,0.08) 30%,
-    rgba(212,86,122,0.04) 50%,
-    transparent 70%);
-  animation: nebula-breathe 10s ease-in-out infinite;
-  pointer-events: none;
-}
-@keyframes nebula-breathe {
-  0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.6; }
-  50% { transform: scale(1.15) rotate(5deg); opacity: 1; }
-}
-.hero-test-badge {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.6rem;
-  letter-spacing: 0.4em;
-  text-transform: uppercase;
-  color: var(--nebula-cyan);
-  border: 1px solid rgba(62,207,207,0.25);
-  padding: 6px 20px;
-  border-radius: 100px;
-  margin-bottom: 30px;
-  opacity: 0;
-  animation: fadeIn 1s ease forwards 0.5s;
-  backdrop-filter: blur(4px);
-  background: rgba(62,207,207,0.03);
-}
-.hero-title-cn {
-  font-family: 'Ma Shan Zheng', cursive;
-  font-size: clamp(2.5rem, 8vw, 6rem);
-  line-height: 1.2;
-  color: var(--star-white);
-  opacity: 0;
-  animation: fadeUp 1.2s cubic-bezier(0.19,1,0.22,1) forwards 0.8s;
-  text-shadow: 0 0 60px rgba(240,192,64,0.15), 0 0 120px rgba(123,94,167,0.1);
-}
-.hero-title-en {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(0.9rem, 2vw, 1.3rem);
-  font-weight: 300;
-  font-style: italic;
-  letter-spacing: 0.15em;
-  color: rgba(232,228,240,0.4);
-  margin-top: 12px;
-  opacity: 0;
-  animation: fadeIn 1.2s ease forwards 1.2s;
-}
-.hero-divider {
-  width: 60px; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--gold-bright), transparent);
-  margin: 28px auto;
-  opacity: 0;
-  animation: fadeIn 1s ease forwards 1.5s;
-}
-.hero-author {
-  font-family: 'Noto Serif SC', serif;
-  font-size: 0.95rem;
-  font-weight: 300;
-  color: var(--gold-dim);
-  letter-spacing: 0.15em;
-  opacity: 0;
-  animation: fadeUp 1s ease forwards 1.7s;
-}
-.hero-date {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.65rem;
-  color: rgba(232,228,240,0.3);
-  letter-spacing: 0.2em;
-  margin-top: 10px;
-  opacity: 0;
-  animation: fadeIn 1s ease forwards 2s;
-}
-
-/* CTA BUTTON */
-.warp-cta-wrap {
-  margin-top: 50px;
-  opacity: 0;
-  animation: fadeUp 1.2s cubic-bezier(0.19,1,0.22,1) forwards 2.3s;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
-}
-.warp-cta {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px 36px;
-  background: linear-gradient(135deg, rgba(240,192,64,0.08), rgba(123,94,167,0.08));
-  border: 1px solid rgba(240,192,64,0.35);
-  color: var(--gold-bright);
-  font-family: 'Noto Serif SC', serif;
-  font-size: 0.95rem;
-  letter-spacing: 0.2em;
-  font-weight: 500;
-  cursor: pointer;
-  border-radius: 4px;
-  text-transform: uppercase;
-  transition: all 0.4s cubic-bezier(0.19,1,0.22,1);
-  overflow: hidden;
-  outline: none;
-}
-.warp-cta::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg,
-    transparent 0%,
-    rgba(240,192,64,0.2) 50%,
-    transparent 100%);
-  transform: translateX(-100%);
-  transition: transform 0.7s ease;
-}
-.warp-cta:hover {
-  border-color: var(--gold-bright);
-  color: #fff;
-  box-shadow: 0 0 40px rgba(240,192,64,0.35), inset 0 0 20px rgba(240,192,64,0.1);
-  transform: translateY(-2px);
-}
-.warp-cta:hover::before { transform: translateX(100%); }
-.warp-cta:active { transform: translateY(0); }
-.warp-cta-icon {
-  display: inline-block;
-  width: 16px; height: 16px;
-  position: relative;
-}
-.warp-cta-icon::before, .warp-cta-icon::after {
-  content: '';
-  position: absolute;
-  background: currentColor;
-}
-.warp-cta-icon::before {
-  width: 100%; height: 2px;
-  top: 50%; left: 0;
-  transform: translateY(-50%);
-  box-shadow: 0 0 8px currentColor;
-}
-.warp-cta-icon::after {
-  width: 6px; height: 6px;
-  border-top: 2px solid currentColor;
-  border-right: 2px solid currentColor;
-  background: transparent;
-  right: 0; top: 50%;
-  transform: translateY(-50%) rotate(45deg);
-}
-.warp-cta-hint {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.55rem;
-  letter-spacing: 0.35em;
-  color: rgba(232,228,240,0.35);
-}
-
-.scroll-indicator {
-  position: absolute;
-  bottom: 24px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  opacity: 0;
-  animation: fadeIn 1s ease forwards 2.8s;
-}
-.scroll-indicator span {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.5rem;
-  letter-spacing: 0.4em;
-  color: rgba(240,192,64,0.4);
-}
-.scroll-indicator .line {
-  width: 1px; height: 40px;
-  background: linear-gradient(to bottom, var(--gold-dim), transparent);
-  animation: pulse-line 2.5s ease-in-out infinite;
-}
-@keyframes pulse-line {
-  0%,100% { opacity: 0.2; transform: scaleY(0.5); }
-  50% { opacity: 0.8; transform: scaleY(1); }
-}
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(25px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* ═══════ ANNOUNCEMENT ═══════ */
-.announce-section {
-  padding: 100px 8vw 80px;
-  display: flex;
-  justify-content: center;
-}
-.announce-card {
-  max-width: 720px;
-  width: 100%;
-  background: linear-gradient(170deg, rgba(20,18,35,0.9), rgba(10,10,26,0.95));
-  border: 1px solid rgba(240,192,64,0.1);
-  border-radius: 24px;
-  padding: 50px 45px;
-  position: relative;
-  overflow: hidden;
-  opacity: 0;
-  transform: translateY(40px);
-}
-.announce-card.visible {
-  opacity: 1; transform: translateY(0);
-  transition: all 1s cubic-bezier(0.19,1,0.22,1);
-}
-.announce-card::before {
-  content: '公告';
-  position: absolute;
-  top: -20px; right: -10px;
-  font-family: 'Ma Shan Zheng', cursive;
-  font-size: 8rem;
-  color: rgba(240,192,64,0.03);
-  pointer-events: none;
-}
-.announce-card::after {
-  content: '';
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 3px;
-  background: linear-gradient(90deg, var(--gold-bright), var(--nebula-pink), var(--nebula-purple));
-}
-.announce-icon { font-size: 2rem; margin-bottom: 16px; }
-.announce-title {
-  font-family: 'Noto Serif SC', serif;
-  font-size: 1.6rem;
-  font-weight: 600;
-  margin-bottom: 20px;
-  line-height: 1.6;
-  background: linear-gradient(135deg, var(--star-white), var(--gold-bright));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.announce-body {
-  font-size: 0.92rem;
-  line-height: 2;
-  color: rgba(232,228,240,0.7);
-  font-weight: 300;
-}
-.announce-body strong { color: var(--gold-bright); font-weight: 600; }
-.announce-body .highlight { color: var(--nebula-cyan); }
-.announce-body .pulse-dot {
-  display: inline-block;
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--nebula-cyan);
-  margin-right: 8px;
-  vertical-align: middle;
-  animation: pulse-dot 1.4s ease-in-out infinite;
-  box-shadow: 0 0 12px var(--nebula-cyan);
-}
-@keyframes pulse-dot {
-  0%, 100% { opacity: 0.4; transform: scale(0.85); }
-  50% { opacity: 1; transform: scale(1.1); }
-}
-.announce-progress {
-  margin-top: 28px;
-  padding: 18px 0;
-}
-.announce-progress-label {
-  display: flex;
-  justify-content: space-between;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.65rem;
-  letter-spacing: 0.2em;
-  color: rgba(232,228,240,0.5);
-  margin-bottom: 10px;
-}
-.announce-progress-label .pct { color: var(--gold-bright); font-weight: 500; }
-.announce-progress-bar {
-  height: 4px;
-  background: rgba(255,255,255,0.05);
-  border-radius: 2px;
-  overflow: hidden;
-  position: relative;
-}
-.announce-progress-fill {
-  height: 100%;
-  width: 0;
-  background: linear-gradient(90deg, var(--nebula-purple), var(--gold-bright), var(--nebula-cyan));
-  border-radius: 2px;
-  position: relative;
-  transition: width 2s cubic-bezier(0.19,1,0.22,1);
-  box-shadow: 0 0 10px rgba(240,192,64,0.5);
-}
-.announce-progress-fill::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-  animation: shimmer 2s linear infinite;
-}
-@keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
-.announce-meta {
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid rgba(240,192,64,0.08);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-.announce-meta span {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.6rem;
-  letter-spacing: 0.15em;
-  color: rgba(232,228,240,0.35);
-}
-
-/* ═══════ TIMELINE ═══════ */
-.timeline-section { padding: 60px 8vw 100px; }
-.section-label {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.55rem;
-  letter-spacing: 0.5em;
-  text-transform: uppercase;
-  color: var(--gold-dim);
-  text-align: center;
-  margin-bottom: 12px;
-}
-.section-heading {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(2rem, 5vw, 3.2rem);
-  font-weight: 300;
-  text-align: center;
-  margin-bottom: 60px;
-  color: var(--star-white);
-}
-.section-heading i { color: var(--gold-dim); }
-.timeline {
-  position: relative;
-  max-width: 700px;
-  margin: 0 auto;
-  padding-left: 40px;
-}
-.timeline::before {
-  content: '';
-  position: absolute;
-  left: 8px; top: 0; bottom: 0;
-  width: 1px;
-  background: linear-gradient(to bottom, var(--gold-bright), rgba(240,192,64,0.1), transparent);
-}
-.tl-item {
-  position: relative;
-  margin-bottom: 50px;
-  opacity: 0;
-  transform: translateX(-20px);
-}
-.tl-item.visible {
-  opacity: 1; transform: translateX(0);
-  transition: all 0.8s cubic-bezier(0.19,1,0.22,1);
-}
-.tl-dot {
-  position: absolute;
-  left: -36px; top: 6px;
-  width: 12px; height: 12px;
-  border-radius: 50%;
-  border: 2px solid var(--gold-bright);
-  background: var(--void);
-}
-.tl-item.active .tl-dot {
-  background: var(--gold-bright);
-  box-shadow: 0 0 12px rgba(240,192,64,0.5);
-}
-.tl-year {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.65rem;
-  letter-spacing: 0.3em;
-  color: var(--gold-dim);
-  margin-bottom: 6px;
-}
-.tl-title {
-  font-family: 'Noto Serif SC', serif;
-  font-size: 1.15rem;
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-.tl-desc {
-  font-size: 0.85rem;
-  line-height: 1.8;
-  color: rgba(232,228,240,0.5);
-  font-weight: 300;
-}
-
-/* ═══════ FEATURES COSMOS GRID ═══════ */
-.features-section { padding: 80px 8vw 100px; }
-.cosmos-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 18px;
-  max-width: 960px;
-  margin: 0 auto;
-}
-.cosmos-card {
-  border-radius: 20px;
-  padding: 36px 30px;
-  position: relative;
-  overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.04);
-  opacity: 0;
-  transform: translateY(30px);
-  transition: all 0.6s cubic-bezier(0.19,1,0.22,1), box-shadow 0.4s;
-}
-.cosmos-card.visible { opacity: 1; transform: translateY(0); }
-.cosmos-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 48px rgba(0,0,0,0.4);
-}
-.cosmos-card .c-icon { font-size: 2rem; margin-bottom: 16px; display: block; }
-.cosmos-card .c-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.2rem;
-  font-weight: 600;
-  margin-bottom: 10px;
-}
-.cosmos-card .c-text {
-  font-size: 0.8rem;
-  line-height: 1.8;
-  color: rgba(232,228,240,0.5);
-  font-weight: 300;
-}
-.cc1 { background: linear-gradient(160deg, #0f1528, #0a0f1e); border-color: rgba(62,207,207,0.1); }
-.cc2 { background: linear-gradient(160deg, #170f20, #0e0a18); border-color: rgba(123,94,167,0.1); }
-.cc3 { background: linear-gradient(160deg, #1a1308, #100e06); border-color: rgba(240,192,64,0.1); }
-.cc4 { background: linear-gradient(160deg, #1a0a12, #120810); border-color: rgba(212,86,122,0.1); grid-column: 1 / 2; }
-.cc5 { background: linear-gradient(160deg, #081518, #060f12); border-color: rgba(62,207,207,0.08); grid-column: 2 / 4; }
-
-/* ═══════ QUOTE ═══════ */
-.quote-section { padding: 80px 8vw; text-align: center; }
-.quote-section blockquote {
-  font-family: 'Ma Shan Zheng', cursive;
-  font-size: clamp(1.5rem, 4vw, 2.8rem);
-  line-height: 1.6;
-  color: rgba(232,228,240,0.6);
-  max-width: 680px;
-  margin: 0 auto;
-  position: relative;
-}
-.quote-section blockquote::before {
-  content: '\201C';
-  position: absolute;
-  top: -40px; left: -30px;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 6rem;
-  color: rgba(240,192,64,0.1);
-  line-height: 1;
-}
-.quote-author {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.6rem;
-  letter-spacing: 0.4em;
-  color: var(--gold-dim);
-  margin-top: 24px;
-  opacity: 0.6;
-}
-
-/* ═══════ SOCIAL LINKS ═══════ */
-.social-section {
-  padding: 60px 8vw 20px;
-  text-align: center;
-}
-.social-orbit {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 28px;
-  margin-top: 36px;
-  flex-wrap: wrap;
-}
-.social-link {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  text-decoration: none;
-  color: var(--star-white);
-  padding: 24px 32px;
-  border-radius: 18px;
-  border: 1px solid rgba(255,255,255,0.05);
-  background: rgba(10,10,26,0.5);
-  min-width: 150px;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: all 0.5s cubic-bezier(0.19,1,0.22,1);
-}
-.social-link.visible { opacity: 1; transform: translateY(0); }
-.social-link:hover {
-  transform: translateY(-5px);
-  border-color: rgba(240,192,64,0.3);
-  box-shadow: 0 14px 36px rgba(0,0,0,0.5);
-}
-.social-icon { width: 32px; height: 32px; color: var(--star-white); }
-.social-icon svg { width: 100%; height: 100%; fill: currentColor; }
-.social-name {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1rem;
-  font-weight: 600;
-}
-.social-id {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.55rem;
-  letter-spacing: 0.2em;
-  color: rgba(232,228,240,0.4);
-}
-
-/* ═══════ COMING SOON ═══════ */
-.coming-section {
-  padding: 100px 8vw;
-  text-align: center;
-  position: relative;
-}
-.coming-badge {
-  display: inline-block;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.6rem;
-  letter-spacing: 0.4em;
-  color: var(--nebula-pink);
-  border: 1px solid rgba(212,86,122,0.3);
-  padding: 6px 18px;
-  border-radius: 100px;
-  margin-bottom: 22px;
-  position: relative;
-}
-.coming-badge::before {
-  content: '';
-  display: inline-block;
-  width: 6px; height: 6px;
-  background: var(--nebula-pink);
-  border-radius: 50%;
-  margin-right: 8px;
-  vertical-align: middle;
-  animation: pulse-dot 1.4s ease-in-out infinite;
-  box-shadow: 0 0 8px var(--nebula-pink);
-}
-.coming-title {
-  font-family: 'Ma Shan Zheng', cursive;
-  font-size: clamp(2rem, 5vw, 3.5rem);
-  color: var(--star-white);
-  margin-bottom: 16px;
-}
-.coming-title span { color: var(--gold-bright); }
-.coming-desc {
-  font-size: 0.95rem;
-  line-height: 2;
-  color: rgba(232,228,240,0.5);
-  font-weight: 300;
-  max-width: 580px;
-  margin: 0 auto 40px;
-}
-.countdown-row {
-  display: flex;
-  justify-content: center;
-  gap: 30px;
-  flex-wrap: wrap;
-  margin-bottom: 40px;
-}
-.cd-item {
-  min-width: 90px;
-  padding: 20px 14px;
-  background: linear-gradient(160deg, rgba(20,18,35,0.85), rgba(10,10,26,0.95));
-  border: 1px solid rgba(240,192,64,0.12);
-  border-radius: 14px;
-  position: relative;
-  overflow: hidden;
-}
-.cd-item::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--gold-bright), transparent);
-  opacity: 0.5;
-}
-.cd-num {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 2.4rem;
-  font-weight: 600;
-  color: var(--gold-bright);
-  line-height: 1;
-  text-shadow: 0 0 20px rgba(240,192,64,0.3);
-}
-.cd-label {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.55rem;
-  letter-spacing: 0.3em;
-  color: rgba(232,228,240,0.4);
-  margin-top: 10px;
-}
-.coming-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 14px;
-  padding: 18px 44px;
-  background: linear-gradient(135deg, var(--gold-bright), var(--cosmic-orange));
-  color: var(--void);
-  font-family: 'Noto Serif SC', serif;
-  font-size: 1rem;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  cursor: pointer;
-  border: none;
-  border-radius: 4px;
-  outline: none;
-  transition: all 0.4s cubic-bezier(0.19,1,0.22,1);
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 8px 32px rgba(240,192,64,0.25);
-}
-.coming-cta::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-  transform: translateX(-100%);
-  transition: transform 0.7s;
-}
-.coming-cta:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 16px 48px rgba(240,192,64,0.45);
-}
-.coming-cta:hover::before { transform: translateX(100%); }
-.coming-cta-icon {
-  display: inline-block;
-  width: 14px; height: 14px;
-  position: relative;
-}
-.coming-cta-icon::before {
-  content: '';
-  position: absolute;
-  width: 100%; height: 2px;
-  background: currentColor;
-  top: 50%; transform: translateY(-50%);
-}
-.coming-cta-icon::after {
-  content: '';
-  position: absolute;
-  width: 6px; height: 6px;
-  border-top: 2px solid currentColor;
-  border-right: 2px solid currentColor;
-  right: 0; top: 50%;
-  transform: translateY(-50%) rotate(45deg);
-}
-
-/* ═══════ FOOTER ═══════ */
-footer {
-  padding: 50px 5vw 30px;
-  border-top: 1px solid rgba(240,192,64,0.08);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 20px;
-}
-.footer-left {
-  font-family: 'Ma Shan Zheng', cursive;
-  color: var(--gold-dim);
-  font-size: 0.95rem;
-}
-.footer-center { display: flex; gap: 20px; }
-.footer-center a {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  text-decoration: none;
-  color: rgba(232,228,240,0.45);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.65rem;
-  letter-spacing: 0.2em;
-  transition: color 0.3s;
-}
-.footer-center a:hover { color: var(--gold-bright); }
-.footer-center svg { width: 14px; height: 14px; fill: currentColor; }
-.footer-right {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.55rem;
-  letter-spacing: 0.2em;
-  color: rgba(232,228,240,0.3);
-}
-
-/* ═══════ SHOOTING STAR ═══════ */
-.shooting-star {
-  position: fixed;
-  width: 120px; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--gold-bright), transparent);
-  z-index: 0;
-  pointer-events: none;
-  animation: shoot 1.5s ease-out forwards;
-  transform-origin: left;
-}
-@keyframes shoot {
-  0% { opacity: 0; transform: translateX(0) scaleX(0); }
-  10% { opacity: 1; }
-  100% { opacity: 0; transform: translateX(300px) scaleX(1.5); }
-}
-
-/* ═══════════════════════════════════════════════════════
-   WARP / 曲率引擎跃迁 IFRAME 嵌入 (One-Body)
-   ═══════════════════════════════════════════════════════ */
-.warp-stage {
-  position: fixed;
-  inset: 0;
-  z-index: 9000;
-  background: #000;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.8s ease;
-  pointer-events: none;
-}
-.warp-stage.show {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-}
-.warp-stage iframe {
-  width: 100%;
-  height: 100%;
-  border: 0;
-  display: block;
-}
-
-.warp-loader {
-  position: fixed;
-  inset: 0;
-  z-index: 9500;
-  background: var(--void);
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 24px;
-}
-.warp-loader.show { display: flex; }
-.warp-loader .loader-title {
-  font-family: 'Ma Shan Zheng', cursive;
-  font-size: 1.5rem;
-  color: var(--gold-bright);
-  letter-spacing: 0.4em;
-  text-shadow: 0 0 24px rgba(240,192,64,0.5);
-}
-.warp-loader .loader-sub {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.65rem;
-  letter-spacing: 0.5em;
-  color: var(--nebula-cyan);
-  opacity: 0.7;
-}
-.warp-loader .loader-bar {
-  width: 200px; height: 2px;
-  background: rgba(240,192,64,0.1);
-  border-radius: 2px;
-  overflow: hidden;
-  margin-top: 8px;
-}
-.warp-loader .loader-bar div {
-  height: 100%;
-  width: 30%;
-  background: linear-gradient(90deg, transparent, var(--gold-bright), transparent);
-  animation: loader-slide 1.4s ease-in-out infinite;
-}
-@keyframes loader-slide {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(400%); }
-}
-
-.warp-skip {
-  position: fixed;
-  bottom: 30px; right: 30px;
-  z-index: 9999;
-  padding: 10px 18px;
-  background: rgba(10,10,26,0.7);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(240,192,64,0.25);
-  border-radius: 100px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.6rem;
-  letter-spacing: 0.2em;
-  color: var(--gold-bright);
-  cursor: pointer;
-  display: none;
-  transition: all 0.3s ease;
-}
-.warp-skip.show { display: inline-flex; }
-.warp-skip:hover {
-  background: rgba(240,192,64,0.1);
-  border-color: var(--gold-bright);
-}
-
-.warp-flash {
-  position: fixed;
-  inset: 0;
-  z-index: 9700;
-  background: white;
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* ═══════════════════════════════════════════════════════
-   BLOG ARRIVED 抵达后博客界面
-   ═══════════════════════════════════════════════════════ */
-.blog-arrived {
-  position: relative;
-  z-index: 5;
-  display: none;
-  min-height: 100vh;
-  padding: 0;
-}
-.blog-arrived.show { display: block; }
-.blog-arrived.fade-in {
-  animation: blog-fade-in 1.5s cubic-bezier(0.19,1,0.22,1) forwards;
-}
-@keyframes blog-fade-in {
-  from { opacity: 0; transform: translateY(40px); filter: blur(20px); }
-  to   { opacity: 1; transform: translateY(0); filter: blur(0); }
-}
-.blog-hero {
-  min-height: 90vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 100px 20px 60px;
-  position: relative;
-}
-.blog-hero-badge {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.55rem;
-  letter-spacing: 0.5em;
-  color: var(--nebula-cyan);
-  padding: 6px 20px;
-  border: 1px solid rgba(62,207,207,0.3);
-  border-radius: 100px;
-  margin-bottom: 28px;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-}
-.blog-hero-badge::before {
-  content: '';
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--nebula-cyan);
-  box-shadow: 0 0 10px var(--nebula-cyan);
-  animation: pulse-dot 1.4s ease-in-out infinite;
-}
-.blog-hero-title {
-  font-family: 'Ma Shan Zheng', cursive;
-  font-size: clamp(2.5rem, 7vw, 5rem);
-  line-height: 1.3;
-  margin-bottom: 18px;
-  background: linear-gradient(135deg, var(--star-white) 30%, var(--gold-bright) 70%, var(--nebula-pink));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: 0 0 80px rgba(240,192,64,0.2);
-}
-.blog-hero-sub {
-  font-family: 'Cormorant Garamond', serif;
-  font-style: italic;
-  font-size: clamp(1rem, 2.2vw, 1.4rem);
-  letter-spacing: 0.15em;
-  color: rgba(232,228,240,0.5);
-  margin-bottom: 30px;
-}
-.blog-hero-divider {
-  width: 80px; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--gold-bright), transparent);
-  margin: 0 auto 30px;
-}
-.blog-hero-intro {
-  max-width: 680px;
-  font-size: 1rem;
-  line-height: 2;
-  color: rgba(232,228,240,0.7);
-  font-weight: 300;
-  margin: 0 auto;
-}
-.blog-about {
-  padding: 80px 8vw 60px;
-  max-width: 1100px;
-  margin: 0 auto;
-}
-.blog-about-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 60px;
-  align-items: start;
-}
-.blog-about-left .label {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.55rem;
-  letter-spacing: 0.5em;
-  color: var(--gold-dim);
-  margin-bottom: 14px;
-}
-.blog-about-left h3 {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(2rem, 4vw, 2.8rem);
-  font-weight: 300;
-  line-height: 1.2;
-  margin-bottom: 24px;
-}
-.blog-about-left h3 i { color: var(--gold-bright); }
-.blog-about-left p {
-  font-size: 0.95rem;
-  line-height: 2;
-  color: rgba(232,228,240,0.6);
-  font-weight: 300;
-}
-.blog-about-right {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-.about-stat {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 22px 26px;
-  background: linear-gradient(160deg, rgba(20,18,35,0.7), rgba(10,10,26,0.85));
-  border: 1px solid rgba(240,192,64,0.08);
-  border-radius: 14px;
-  position: relative;
-  overflow: hidden;
-}
-.about-stat::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  width: 3px;
-  background: linear-gradient(to bottom, var(--gold-bright), transparent);
-}
-.about-stat .stat-label {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.6rem;
-  letter-spacing: 0.25em;
-  color: rgba(232,228,240,0.5);
-}
-.about-stat .stat-value {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.8rem;
-  font-weight: 600;
-  color: var(--gold-bright);
-  line-height: 1;
-}
-.about-stat .stat-value sup {
-  font-size: 0.7rem;
-  color: rgba(232,228,240,0.4);
-  font-family: 'JetBrains Mono', monospace;
-  margin-left: 4px;
-  letter-spacing: 0;
-  vertical-align: super;
-}
-.blog-posts {
-  padding: 60px 8vw 100px;
-  max-width: 1100px;
-  margin: 0 auto;
-}
-.blog-posts-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 50px;
-  flex-wrap: wrap;
-  gap: 20px;
-}
-.blog-posts-head h2 {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(2rem, 4.5vw, 3rem);
-  font-weight: 300;
-}
-.blog-posts-head h2 i { color: var(--gold-bright); font-style: italic; }
-.blog-posts-head .post-count {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.6rem;
-  letter-spacing: 0.3em;
-  color: rgba(232,228,240,0.4);
-}
-.blog-posts-head .post-count b { color: var(--gold-bright); font-weight: 500; }
-.post-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 22px;
-}
-.post-card {
-  background: linear-gradient(160deg, rgba(20,18,35,0.75), rgba(10,10,26,0.9));
-  border: 1px solid rgba(255,255,255,0.05);
-  border-radius: 18px;
-  padding: 32px 28px 26px;
-  cursor: pointer;
-  transition: all 0.5s cubic-bezier(0.19,1,0.22,1);
-  position: relative;
-  overflow: hidden;
-}
-.post-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 2px;
-  background: linear-gradient(90deg, transparent, var(--accent-color, var(--gold-bright)), transparent);
-  opacity: 0;
-  transition: opacity 0.4s;
-}
-.post-card:hover {
-  transform: translateY(-5px);
-  border-color: rgba(240,192,64,0.25);
-  box-shadow: 0 22px 48px rgba(0,0,0,0.4);
-}
-.post-card:hover::before { opacity: 1; }
-.post-card[data-cat="tech"] { --accent-color: var(--nebula-cyan); }
-.post-card[data-cat="design"] { --accent-color: var(--nebula-purple); }
-.post-card[data-cat="thoughts"] { --accent-color: var(--gold-bright); }
-.post-card[data-cat="life"] { --accent-color: var(--nebula-pink); }
-.post-cat {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.55rem;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  color: var(--accent-color, var(--gold-bright));
-  margin-bottom: 16px;
-}
-.post-cat::before {
-  content: '';
-  width: 5px; height: 5px;
-  border-radius: 50%;
-  background: var(--accent-color, var(--gold-bright));
-  box-shadow: 0 0 8px var(--accent-color, var(--gold-bright));
-}
-.post-title {
-  font-family: 'Noto Serif SC', serif;
-  font-size: 1.2rem;
-  font-weight: 600;
-  line-height: 1.5;
-  color: var(--star-white);
-  margin-bottom: 12px;
-}
-.post-excerpt {
-  font-size: 0.85rem;
-  line-height: 1.85;
-  color: rgba(232,228,240,0.5);
-  font-weight: 300;
-  margin-bottom: 22px;
-}
-.post-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.55rem;
-  letter-spacing: 0.2em;
-  color: rgba(232,228,240,0.3);
-  padding-top: 16px;
-  border-top: 1px solid rgba(255,255,255,0.05);
-}
-.post-meta .read-more {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--accent-color, var(--gold-bright));
-  transition: gap 0.3s;
-}
-.post-card:hover .read-more { gap: 12px; }
-.post-soon {
-  opacity: 0.5;
-  pointer-events: none;
-  position: relative;
-}
-.post-soon::after {
-  content: 'COMING SOON';
-  position: absolute;
-  top: 16px; right: 16px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.5rem;
-  letter-spacing: 0.3em;
-  color: var(--gold-dim);
-  border: 1px solid rgba(240,192,64,0.25);
-  padding: 3px 8px;
-  border-radius: 100px;
-}
-.return-home {
-  position: fixed;
-  top: 80px; left: 5vw;
-  z-index: 200;
-  display: none;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 18px;
-  background: rgba(10,10,26,0.7);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(240,192,64,0.2);
-  border-radius: 100px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.65rem;
-  letter-spacing: 0.2em;
-  color: var(--gold-bright);
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-.return-home.show { display: inline-flex; }
-.return-home:hover {
-  background: rgba(240,192,64,0.1);
-  border-color: var(--gold-bright);
-}
-
-@media (max-width: 768px) {
-  .cosmos-grid { grid-template-columns: 1fr; }
-  .cc4, .cc5 { grid-column: auto; }
-  .announce-card { padding: 36px 28px; }
-  .countdown-row { gap: 16px; }
-  .cd-num { font-size: 2rem; }
-  footer { flex-direction: column; text-align: center; }
-  .social-orbit { gap: 14px; }
-  .social-link { min-width: 120px; padding: 20px 22px; }
-  .footer-center { gap: 14px; }
-  .blog-about-grid { grid-template-columns: 1fr; gap: 30px; }
-  .return-home { left: 50%; transform: translateX(-50%); top: 70px; }
-}
-</style>
+<title>昨夜星辰 · 锦春来 — 浩瀚宇宙，广袤星辰</title>
+<meta name="description" content="昨夜星辰 · Stellaria Blog — 记录技术探索、设计思考与生活感悟的私人宇宙。2026 年 6 月重启。">
+<link rel="icon" type="image/svg+xml" href="image/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Space+Mono:wght@400;700&family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
 <div class="grain"></div>
+
+<!-- 日 / 夜 跃迁过渡层（日出 · 日落） -->
+<div class="celestial-transition" id="ctrans" aria-hidden="true"><div class="ct-orb"></div></div>
 
 <!-- 初始加载 -->
 <div class="loading-screen" id="loader">
@@ -1283,6 +26,17 @@ footer {
 
 <!-- 2D 常态星空背景 -->
 <canvas id="cosmos"></canvas>
+
+<!-- 日间天空：太阳 + 流云（夜间隐藏） -->
+<div class="day-sky" aria-hidden="true">
+  <div class="sun"></div>
+  <div class="cloud c1"></div>
+  <div class="cloud c2"></div>
+  <div class="cloud c3"></div>
+</div>
+
+<!-- 边缘晕影 -->
+<div class="vignette"></div>
 
 <!-- 跃迁前的加载提示 (iframe 加载时显示) -->
 <div class="warp-loader" id="warp-loader">
@@ -1311,6 +65,13 @@ footer {
       <a href="https://github.com/DreamStar1996" target="_blank" title="GitHub"><svg viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg></a>
       <a href="https://gitee.com/DreamStar1996" target="_blank" title="Gitee"><svg viewBox="0 0 24 24"><path d="M11.984 0A12 12 0 000 12a12 12 0 0012 12 12 12 0 0012-12A12 12 0 0012 0zm6.09 5.333c.328 0 .593.266.592.593v1.482a.594.594 0 01-.593.592H9.777c-.982 0-1.778.796-1.778 1.778v5.63c0 .329.267.593.593.593h5.19c.329 0 .593-.264.593-.593v-1.482a.593.593 0 00-.593-.592h-3.112a.593.593 0 01-.593-.593V9.778c0-.329.266-.593.593-.593h7.999z"/></svg></a>
       <a href="https://www.foreverblog.cn" target="_blank" title="十年之约"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></a>
+      <button class="theme-toggle" id="themeToggle" role="switch" aria-checked="false" aria-label="切换日间 / 夜间模式">
+        <span class="tt-track">
+          <svg class="tt-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
+          <svg class="tt-moon" viewBox="0 0 24 24" fill="currentColor"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5Z"/></svg>
+          <span class="tt-knob"></span>
+        </span>
+      </button>
       <div class="topbar-badge">TEST PAGE · 演示页</div>
     </div>
   </nav>
@@ -1494,14 +255,30 @@ footer {
      ═════════════════════════════════════════════ -->
 <div class="blog-arrived" id="blog-arrived">
   <section class="blog-hero">
+    <svg class="blog-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+      <circle class="ring" cx="20" cy="20" r="18.5" stroke-width="1"/>
+      <path class="star" d="M20 4 L22.4 16.2 L34.5 14 L24.2 20 L34.5 26 L22.4 23.8 L20 36 L17.6 23.8 L5.5 26 L15.8 20 L5.5 14 L17.6 16.2 Z" opacity=".9"/>
+      <circle class="core" cx="20" cy="20" r="2.2" stroke-width=".8"/>
+    </svg>
     <div class="blog-hero-badge">ARRIVED · 抵达目的地</div>
     <h1 class="blog-hero-title">昨夜星辰 · 博客</h1>
     <p class="blog-hero-sub">A Personal Universe of Code, Design & Thoughts</p>
     <div class="blog-hero-divider"></div>
+    <div class="blog-readout">
+      <span><b>48.86°N</b> · <b>2.35°E</b> · 巴黎</span>
+      <span class="dot">/</span>
+      <span><span class="night-only">今夜 · <b>晴</b> · 能见度良好</span><span class="day-only">今日 · <b>晴</b> · 紫外线中等</span></span>
+      <span class="dot">/</span>
+      <span><span class="night-only">月相 · <b>盈凸月</b></span><span class="day-only">体感 · <b>舒适</b></span></span>
+    </div>
     <p class="blog-hero-intro">
       这里是「锦春来」的数字栖息地。一个记录技术探索、设计思考与生活感悟的私人宇宙。<br>
       博客重启进入最终阶段，以下是即将上线的内容预览。
     </p>
+    <div class="blog-hero-actions">
+      <a href="#blog-posts" class="btn btn-gold">浏览手记 ↗</a>
+      <a href="#friend-links" class="btn btn-ghost">看看友链</a>
+    </div>
   </section>
 
   <section class="blog-about">
@@ -1524,328 +301,312 @@ footer {
     </div>
   </section>
 
-  <section class="blog-posts">
-    <div class="blog-posts-head">
-      <h2>最新 <i>文章</i> · Recent Posts</h2>
-      <div class="post-count">TOTAL <b>06</b> / PREVIEW</div>
+  <!-- 今夜星象 · TONIGHT（信息面板，迁移自观星志） -->
+  <section class="tonight-section">
+    <div class="tonight-intro" data-reveal>
+      <div class="label">· TONIGHT ·</div>
+      <h3>此刻的<i> 那片夜空</i></h3>
+      <p>博客以星辰为名。这里记录此刻头顶的天象——月相、可见行星与银河可见度。愿每一次打开，都像推开一扇朝向宇宙的窗。</p>
     </div>
-    <div class="post-list">
-      <div class="post-card" data-cat="tech">
-        <div class="post-cat">技术深空 · TECH</div>
-        <div class="post-title">致敬《三体》:三体水滴与曲率引擎的前端实现</div>
-        <div class="post-excerpt">本页点击「启动曲率引擎」后看到的穿梭动画,来自 One-Body 这个开源项目。从星空粒子到曲率隧道,本文拆解其 Three.js 实现细节。</div>
-        <div class="post-meta"><span>2026.03.15 · 8 min</span><span class="read-more">READ →</span></div>
+    <aside class="tonight" data-reveal>
+      <h3><span>今夜观测</span><span class="lbl">TONIGHT</span></h3>
+      <div class="moon-row">
+        <svg class="ico moon" viewBox="0 0 60 60">
+          <defs><radialGradient id="mg" cx="38%" cy="38%"><stop offset="0%" stop-color="#fdf6e3"/><stop offset="100%" stop-color="#cbb78a"/></radialGradient></defs>
+          <circle cx="30" cy="30" r="24" fill="#15152e"/>
+          <path d="M30 6 a24 24 0 0 1 0 48 a17 24 0 0 0 0 -48" fill="url(#mg)"/>
+          <circle cx="36" cy="22" r="2.4" fill="#000" opacity=".08"/>
+          <circle cx="42" cy="34" r="3" fill="#000" opacity=".07"/>
+          <circle cx="34" cy="40" r="1.8" fill="#000" opacity=".08"/>
+        </svg>
+        <svg class="ico sun-ic" viewBox="0 0 60 60">
+          <defs><radialGradient id="sg" cx="40%" cy="40%"><stop offset="0%" stop-color="#fff6d8"/><stop offset="60%" stop-color="#ffd166"/><stop offset="100%" stop-color="#f6a82e"/></radialGradient></defs>
+          <g stroke="#f0a830" stroke-width="2.6" stroke-linecap="round">
+            <path d="M30 4V12M30 48V56M4 30H12M48 30H56M11 11l6 6M43 43l6 6M49 11l-6 6M17 43l-6 6"/>
+          </g>
+          <circle cx="30" cy="30" r="13" fill="url(#sg)"/>
+        </svg>
+        <div>
+          <strong><span class="night-only">盈凸月</span><span class="day-only">今日晴朗</span></strong>
+          <small><span class="night-only">照度 78% · 月出 16:42</span><span class="day-only">紫外线 中等 · 体感舒适</span></small>
+        </div>
       </div>
-      <div class="post-card" data-cat="design">
-        <div class="post-cat">设计星云 · DESIGN</div>
-        <div class="post-title">编辑式美学:让博客像一本杂志而不是一个 Feed</div>
-        <div class="post-excerpt">为什么我们都厌倦了千篇一律的卡片瀑布流?本文从 The New Yorker、Pitchfork、Are.na 中找寻答案,重新思考博客的版式语言。</div>
-        <div class="post-meta"><span>2026.03.10 · 6 min</span><span class="read-more">READ →</span></div>
+      <div class="stat"><span class="k">可见行星</span><span class="v gold">金星 · 木星 · 土星</span></div>
+      <div class="stat"><span class="k">日落 / 天文暮光</span><span class="v">20:48 / 22:31</span></div>
+      <div class="stat"><span class="k">推荐目标</span><span class="v">M31 仙女座星系</span></div>
+      <div class="stat"><span class="k">银河可见度</span><span class="v">★★★☆☆</span></div>
+    </aside>
+  </section>
+
+  <!-- 编辑推荐 · 特稿卡 -->
+  <section class="featured-section">
+    <div class="sec-head" data-reveal>
+      <div>
+        <span class="eyebrow">本月精选</span>
+        <h2>编辑推荐 <span class="en">— Featured</span></h2>
       </div>
-      <div class="post-card" data-cat="thoughts">
-        <div class="post-cat">灵感彗星 · THOUGHTS</div>
-        <div class="post-title">五年沉默后,重新开始写博客这件事</div>
-        <div class="post-excerpt">2021 到 2026,从激情到沉寂再到重启。一些关于持续创作、个人品牌与中年程序员的真心话。</div>
-        <div class="post-meta"><span>2026.03.01 · 5 min</span><span class="read-more">READ →</span></div>
+      <a href="#blog-posts" class="more">查看全部 →</a>
+    </div>
+    <a href="#" class="feat-card" data-reveal>
+      <div class="feat-thumb sky-thumb t-feat"></div>
+      <div class="feat-body">
+        <span class="cat">技术深空 · FEATURED</span>
+        <h3>致敬《三体》：水滴与曲率引擎的前端实现</h3>
+        <p>本页点击「启动曲率引擎」后的穿梭动画，来自 One-Body 开源项目。从星空粒子到曲率隧道，本文拆解其 Three.js 实现细节，以及如何把它无缝嵌进一张静态博客首页。</p>
+        <div class="meta">
+          <span>2026.03.15</span><span class="sep"></span>
+          <span>阅读约 12 分钟</span><span class="sep"></span>
+          <span>作者 · 锦春来</span>
+        </div>
       </div>
-      <div class="post-card post-soon" data-cat="life">
-        <div class="post-cat">生活行星 · LIFE</div>
-        <div class="post-title">在2019年开始,我开始记录每一颗看见的星</div>
-        <div class="post-excerpt">从天津到大连到家乡,从工位到阳台。一份关于通勤、阅读、星空与晚饭的记录手账。</div>
-        <div class="post-meta"><span>—— · —— min</span><span class="read-more">SOON →</span></div>
+    </a>
+  </section>
+
+  <!-- 近期手记 · 文章网格（星云缩略图卡，迁移自观星志） -->
+  <section class="sky-section" id="blog-posts">
+    <div class="sec-head" data-reveal>
+      <div>
+        <span class="eyebrow">最新更新</span>
+        <h2>近期手记 <span class="en">— Recent Posts</span></h2>
       </div>
-      <div class="post-card post-soon" data-cat="tech">
-        <div class="post-cat">技术深空 · TECH</div>
-        <div class="post-title">从零搭建一个极简的、可持续维护的博客系统</div>
-        <div class="post-excerpt">Astro + MDX + 自托管图床。一份偏执狂的 Setup 笔记,只为五年后还能跑起来。</div>
-        <div class="post-meta"><span>—— · —— min</span><span class="read-more">SOON →</span></div>
+      <span class="more" style="cursor:default">TOTAL 06 / PREVIEW</span>
+    </div>
+    <div class="sky-grid">
+
+      <a href="#" class="sky-card" data-reveal>
+        <div class="sky-thumb t-orion"></div>
+        <div class="sky-card-body">
+          <span class="cat">设计星云 · DESIGN</span>
+          <h4>编辑式美学：让博客像一本杂志而不是 Feed</h4>
+          <p>为什么我们都厌倦了千篇一律的卡片瀑布流？从 The New Yorker、Pitchfork、Are.na 中寻找答案，重新思考博客的版式语言。</p>
+          <div class="meta"><span>2026.03.10</span><span class="sep"></span><span>6 分钟</span></div>
+        </div>
+      </a>
+
+      <a href="#" class="sky-card" data-reveal>
+        <div class="sky-thumb t-perseid"></div>
+        <div class="sky-card-body">
+          <span class="cat">灵感彗星 · THOUGHTS</span>
+          <h4>五年沉默后，重新开始写博客这件事</h4>
+          <p>从激情到沉寂再到重启。一些关于持续创作、个人品牌，与中年程序员的真心话。</p>
+          <div class="meta"><span>2026.03.01</span><span class="sep"></span><span>5 分钟</span></div>
+        </div>
+      </a>
+
+      <a href="#" class="sky-card" data-reveal>
+        <div class="sky-thumb t-milkyway"></div>
+        <div class="sky-card-body">
+          <span class="cat">生活行星 · LIFE</span>
+          <h4>从 2019 年起，我开始记录每一颗看见的星</h4>
+          <p>从天津到大连到家乡，从工位到阳台。一份关于通勤、阅读、星空与晚饭的手账。</p>
+          <div class="meta"><span>2026.02.18</span><span class="sep"></span><span>7 分钟</span></div>
+        </div>
+      </a>
+
+      <a href="#" class="sky-card" data-reveal>
+        <div class="sky-thumb t-scope"></div>
+        <div class="sky-card-body">
+          <span class="cat">技术深空 · TECH</span>
+          <h4>从零搭建一个极简、可持续维护的博客系统</h4>
+          <p>Astro + MDX + 自托管图床。一份偏执狂的 Setup 笔记，只为五年后还能跑起来。</p>
+          <div class="meta"><span>2026.02.06</span><span class="sep"></span><span>11 分钟</span></div>
+        </div>
+      </a>
+
+      <a href="#" class="sky-card" data-reveal>
+        <div class="sky-thumb t-city"></div>
+        <div class="sky-card-body">
+          <span class="cat">开源银河 · OPEN</span>
+          <h4>Stellaria —— 我开源的下一个小工具</h4>
+          <p>把这套星空背景、日夜切换与卡片样式抽成一个可复用主题。敬请期待。</p>
+          <div class="meta"><span>2026.01.28</span><span class="sep"></span><span>4 分钟</span></div>
+        </div>
+      </a>
+
+      <a href="#" class="sky-card" data-reveal>
+        <div class="sky-thumb t-polaris"></div>
+        <div class="sky-card-body">
+          <span class="cat">设计星云 · DESIGN</span>
+          <h4>暗色优先：让深色主题也有层次与温度</h4>
+          <p>纯黑不是深色设计的终点。谈谈用靛蓝、香槟金与星光蓝，堆叠出真正的夜空质感。</p>
+          <div class="meta"><span>2026.01.15</span><span class="sep"></span><span>8 分钟</span></div>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- 友链墙 · Friendly Links（迁移 / 借鉴 canvas「友链墙」，Hexo 经典页面） -->
+  <section class="links-section" id="friend-links">
+    <div class="sec-head" data-reveal>
+      <div>
+        <span class="eyebrow">星图坐标</span>
+        <h2>友人帐 <span class="en">— Friendly Links</span></h2>
       </div>
-      <div class="post-card post-soon" data-cat="design">
-        <div class="post-cat">开源银河 · OPEN</div>
-        <div class="post-title">Stellaria — 我开源的下一个小工具</div>
-        <div class="post-excerpt">敬请期待。</div>
-        <div class="post-meta"><span>—— · —— min</span><span class="read-more">SOON →</span></div>
+      <span class="more" style="cursor:default">CONSTELLATION OF FRIENDS</span>
+    </div>
+    <div class="links-grid">
+      <a href="https://github.com/DreamStar1996" target="_blank" rel="noopener" class="link-card lk1" data-reveal>
+        <span class="link-avatar">星</span>
+        <span class="link-meta">
+          <span class="link-name">DreamStar</span>
+          <span class="link-intro">代码宇宙的旅行者，记录前端与全栈的星轨。</span>
+        </span>
+      </a>
+      <a href="https://gitee.com/Weichen961108" target="_blank" rel="noopener" class="link-card lk2" data-reveal>
+        <span class="link-avatar">维</span>
+        <span class="link-meta">
+          <span class="link-name">维晨 · Weichen</span>
+          <span class="link-intro">在开放的银河里写代码，也写给自己的备忘。</span>
+        </span>
+      </a>
+      <a href="https://www.foreverblog.cn" target="_blank" rel="noopener" class="link-card lk3" data-reveal>
+        <span class="link-avatar">约</span>
+        <span class="link-meta">
+          <span class="link-name">十年之约</span>
+          <span class="link-intro">一个关于坚持写博客的约定，与时间共振。</span>
+        </span>
+      </a>
+      <a href="#" class="link-card lk4" data-reveal>
+        <span class="link-avatar">云</span>
+        <span class="link-meta">
+          <span class="link-name">云游志</span>
+          <span class="link-intro">设计、摄影与旅行，把生活过成一首长诗。</span>
+        </span>
+      </a>
+      <a href="#" class="link-card lk5" data-reveal>
+        <span class="link-avatar">观</span>
+        <span class="link-meta">
+          <span class="link-name">观星志 · VESPER</span>
+          <span class="link-intro">写给夜空的手记，收藏星辰与值得仰望的瞬间。</span>
+        </span>
+      </a>
+      <a href="#" class="link-card lk6" data-reveal>
+        <span class="link-avatar">岚</span>
+        <span class="link-meta">
+          <span class="link-name">岚山小筑</span>
+          <span class="link-intro">读书笔记与生活随想，在喧嚣里留一处安静。</span>
+        </span>
+      </a>
+    </div>
+    <p class="links-note">想交换友链？发邮件附上 <b>站名 · 简介 · 头像 · 链接</b>，我会在重启后逐一收录。</p>
+  </section>
+
+  <!-- 天象历 · Celestial Calendar -->
+  <section class="calendar-section">
+    <svg class="const-deco" viewBox="0 0 300 200" fill="none">
+      <g>
+        <line x1="30" y1="40" x2="90" y2="70"/><line x1="90" y1="70" x2="140" y2="55"/>
+        <line x1="140" y1="55" x2="200" y2="100"/><line x1="200" y1="100" x2="250" y2="80"/>
+        <line x1="140" y1="55" x2="160" y2="130"/><line x1="160" y1="130" x2="220" y2="160"/>
+        <line x1="90" y1="70" x2="70" y2="140"/>
+      </g>
+      <g>
+        <circle cx="30" cy="40" r="3"/><circle cx="90" cy="70" r="2.5"/><circle cx="140" cy="55" r="3.5"/>
+        <circle cx="200" cy="100" r="2.5"/><circle cx="250" cy="80" r="3"/><circle cx="160" cy="130" r="2.5"/>
+        <circle cx="220" cy="160" r="2"/><circle cx="70" cy="140" r="2.5"/>
+      </g>
+    </svg>
+    <div class="sec-head" data-reveal>
+      <div>
+        <span class="eyebrow">未来的夜空</span>
+        <h2>天象历 <span class="en">— Celestial Calendar</span></h2>
+      </div>
+    </div>
+    <div class="cal-list">
+      <div class="cal-item" data-reveal>
+        <div class="cal-date"><div class="d">06.21</div><div class="m">June</div></div>
+        <div class="cal-info"><h4>夏至 · 北半球白昼最长</h4><p>太阳直射北回归线，是一年中黑夜最短的一晚。</p></div>
+        <span class="cal-tag">节气</span>
+      </div>
+      <div class="cal-item" data-reveal>
+        <div class="cal-date"><div class="d">08.12</div><div class="m">Aug</div></div>
+        <div class="cal-info"><h4>英仙座流星雨极大</h4><p>每小时天顶流量约 100 颗，今年月相条件极佳。</p></div>
+        <span class="cal-tag">流星雨</span>
+      </div>
+      <div class="cal-item" data-reveal>
+        <div class="cal-date"><div class="d">09.21</div><div class="m">Sep</div></div>
+        <div class="cal-info"><h4>土星冲日</h4><p>土星整夜可见、亮度达到峰值，环系清晰可辨。</p></div>
+        <span class="cal-tag">行星</span>
+      </div>
+      <div class="cal-item" data-reveal>
+        <div class="cal-date"><div class="d">11.08</div><div class="m">Nov</div></div>
+        <div class="cal-info"><h4>月全食 · 红月当空</h4><p>地球本影完全笼罩月面，月亮将染成深铜红色。</p></div>
+        <span class="cal-tag">月食</span>
+      </div>
+      <div class="cal-item" data-reveal>
+        <div class="cal-date"><div class="d">12.14</div><div class="m">Dec</div></div>
+        <div class="cal-info"><h4>双子座流星雨极大</h4><p>年度最稳定、最壮观的流星雨之一，火流星频现。</p></div>
+        <span class="cal-tag">流星雨</span>
       </div>
     </div>
   </section>
 
-  <footer style="margin-top: 40px;">
-    <div class="footer-left">✦ 昨夜星辰 - 锦春来</div>
-    <div class="footer-center">
-      <a href="https://github.com/DreamStar1996" target="_blank"><svg viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>GitHub</a>
+  <!-- 星空来信 · Newsletter -->
+  <section class="news-section">
+    <div class="news-inner" data-reveal>
+      <span class="eyebrow" style="position:relative">加入星友</span>
+      <h2>每月一封，星空来信</h2>
+      <p>把这一个月最值得期待的天象、最新的手记与开源进展，整理成一封信，寄给每一个愿意抬头看天的人。</p>
+      <div class="news-form" id="newsForm">
+        <input type="email" id="subEmail" placeholder="你的邮箱地址" aria-label="邮箱">
+        <button id="subBtn" type="button">订阅 →</button>
+      </div>
+      <p class="news-note">没有广告，没有打扰，随时可退订</p>
     </div>
-    <div class="footer-right">© 2021 — 2026 · 此为预览,正式上线请等待倒计时归零</div>
+  </section>
+
+  <!-- 博客富页脚（四栏，迁移自观星志 footer） -->
+  <footer class="blog-foot">
+    <div class="blog-foot-grid">
+      <div class="bf-brand">
+        <div class="bf-name">✦ 昨夜星辰 · Stellaria</div>
+        <p>一座写给夜空的私人宇宙。愿你在每一个晴朗的夜晚，都能找到属于自己的那颗星。</p>
+      </div>
+      <div class="bf-col">
+        <h5>星座</h5>
+        <a href="#blog-posts">技术深空</a><a href="#blog-posts">设计星云</a><a href="#blog-posts">灵感彗星</a><a href="#blog-posts">生活行星</a>
+      </div>
+      <div class="bf-col">
+        <h5>导航</h5>
+        <a href="#blog-posts">近期手记</a><a href="#friend-links">友人帐</a><a href="#calendar">天象历</a><a href="#newsForm">星空来信</a>
+      </div>
+      <div class="bf-col">
+        <h5>关注</h5>
+        <a href="https://github.com/DreamStar1996" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://gitee.com/Weichen961108" target="_blank" rel="noopener">Gitee</a>
+        <a href="https://www.foreverblog.cn" target="_blank" rel="noopener">十年之约</a>
+        <a href="#">RSS 订阅</a>
+      </div>
+    </div>
+    <div class="blog-foot-bottom">
+      <span>© 2021 — 2026 · 昨夜星辰 · 此为预览，正式上线请等待倒计时归零</span>
+      <span class="coord">OBSERVATORY · 48.8566°N 2.3522°E</span>
+    </div>
   </footer>
 </div>
 
 <button class="return-home" id="return-home" type="button">← 返回公告页</button>
 
-<script>
-/* ═══════════════════════════════════════════════════════
-   LOADING
-   ═══════════════════════════════════════════════════════ */
-window.addEventListener('load', () => {
-  setTimeout(() => document.getElementById('loader').classList.add('hidden'), 800);
-  setTimeout(() => {
-    const fill = document.getElementById('progress-fill');
-    if (fill) fill.style.width = '92%';
-  }, 1200);
-});
+<!-- 背景切换：星空 / 星轨 / 流星 -->
+<button class="bg-switch" id="bg-switch" type="button" aria-label="切换背景特效">
+  <span class="bg-switch-ico">✦</span>
+  <span class="bg-switch-txt">
+    <span class="bg-switch-name">星空</span>
+    <span class="bg-switch-en">COSMOS</span>
+  </span>
+</button>
 
-/* ═══════════════════════════════════════════════════════
-   2D 常态星空 (背景)
-   ═══════════════════════════════════════════════════════ */
-const canvas = document.getElementById('cosmos');
-const ctx = canvas.getContext('2d');
-let W, H, scrollY = 0, mouseX = 0, mouseY = 0;
-
-function resize() {
-  W = canvas.width = window.innerWidth;
-  H = canvas.height = window.innerHeight;
-}
-resize();
-window.addEventListener('resize', resize);
-window.addEventListener('scroll', () => scrollY = window.scrollY);
-window.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
-
-const starColors = ['#e8e4f0','#f0c040','#3ecfcf','#d4567a','#7b5ea7'];
-const stars = Array.from({ length: 500 }, () => ({
-  x: Math.random() * 3000 - 500,
-  y: Math.random() * 8000,
-  r: Math.random() * 1.8 + 0.2,
-  speed: Math.random() * 0.4 + 0.05,
-  phase: Math.random() * Math.PI * 2,
-  twinkleSpeed: Math.random() * 0.015 + 0.003,
-  color: starColors[Math.floor(Math.random() * 5)],
-  colorProb: Math.random()
-}));
-const nebulae = Array.from({ length: 12 }, () => ({
-  x: Math.random() * 2000 - 200,
-  y: Math.random() * 6000,
-  r: Math.random() * 200 + 100,
-  color: ['rgba(123,94,167,','rgba(212,86,122,','rgba(26,58,92,','rgba(62,207,207,'][Math.floor(Math.random()*4)],
-  speed: Math.random() * 0.1 + 0.02,
-  phase: Math.random() * Math.PI * 2
-}));
-
-function draw2D() {
-  ctx.clearRect(0, 0, W, H);
-  nebulae.forEach(n => {
-    n.phase += 0.002;
-    const ny = n.y - scrollY * n.speed;
-    const drawY = ((ny % 3000) + 3000) % 3000 - 500;
-    const pulse = 0.5 + Math.sin(n.phase) * 0.3;
-    const grad = ctx.createRadialGradient(((n.x % W)+W)%W, drawY, 0, ((n.x % W)+W)%W, drawY, n.r);
-    grad.addColorStop(0, n.color + (0.04 * pulse) + ')');
-    grad.addColorStop(1, n.color + '0)');
-    ctx.fillStyle = grad;
-    ctx.fillRect(((n.x%W)+W)%W - n.r, drawY - n.r, n.r * 2, n.r * 2);
-  });
-  stars.forEach(s => {
-    s.phase += s.twinkleSpeed;
-    const opacity = s.colorProb > 0.85 ? 0.4 + Math.sin(s.phase) * 0.5 : 0.15 + Math.sin(s.phase) * 0.35;
-    const sy = (s.y - scrollY * s.speed) % 4000;
-    const drawY = sy < 0 ? sy + 4000 : sy;
-    if (drawY > H + 10) return;
-    const col = s.colorProb > 0.92 ? s.color : '#e8e4f0';
-    const sx = ((s.x % W) + W) % W;
-    ctx.beginPath();
-    ctx.arc(sx, drawY, s.r, 0, Math.PI * 2);
-    ctx.fillStyle = col;
-    ctx.globalAlpha = Math.max(0, opacity);
-    ctx.fill();
-    ctx.globalAlpha = 1;
-    if (s.r > 1.5 && opacity > 0.5) {
-      const g = ctx.createRadialGradient(sx, drawY, 0, sx, drawY, s.r * 4);
-      g.addColorStop(0, col.includes('#') ? col + '18' : col);
-      g.addColorStop(1, 'transparent');
-      ctx.fillStyle = g;
-      ctx.beginPath();
-      ctx.arc(sx, drawY, s.r * 4, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  });
-  if (mouseX && mouseY) {
-    const grad = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 120);
-    grad.addColorStop(0, 'rgba(240,192,64,0.015)');
-    grad.addColorStop(1, 'rgba(240,192,64,0)');
-    ctx.fillStyle = grad;
-    ctx.fillRect(mouseX - 120, mouseY - 120, 240, 240);
-  }
-  requestAnimationFrame(draw2D);
-}
-draw2D();
-
-function createShootingStar() {
-  const star = document.createElement('div');
-  star.className = 'shooting-star';
-  star.style.top = Math.random() * 60 + '%';
-  star.style.left = Math.random() * 70 + '%';
-  star.style.transform = 'rotate(' + (-15 + Math.random() * -20) + 'deg)';
-  document.body.appendChild(star);
-  setTimeout(() => star.remove(), 1800);
-}
-setInterval(createShootingStar, 4000 + Math.random() * 3000);
-setTimeout(createShootingStar, 2000);
-
-const revealEls = document.querySelectorAll('[data-reveal]');
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach((entry, i) => {
-    if (entry.isIntersecting) {
-      setTimeout(() => entry.target.classList.add('visible'), i * 100);
-      observer.unobserve(entry.target);
-    }
-  });
-}, { threshold: 0.15 });
-revealEls.forEach(el => observer.observe(el));
-
-const target = new Date('2026-06-01T00:00:00').getTime();
-function updateCountdown() {
-  const now = Date.now();
-  const diff = Math.max(0, target - now);
-  const d = Math.floor(diff / 86400000);
-  const h = Math.floor((diff % 86400000) / 3600000);
-  const m = Math.floor((diff % 3600000) / 60000);
-  const s = Math.floor((diff % 60000) / 1000);
-  document.getElementById('cd-days').textContent = String(d).padStart(2, '0');
-  document.getElementById('cd-hours').textContent = String(h).padStart(2, '0');
-  document.getElementById('cd-mins').textContent = String(m).padStart(2, '0');
-  document.getElementById('cd-secs').textContent = String(s).padStart(2, '0');
-}
-updateCountdown();
-setInterval(updateCountdown, 1000);
+<!-- 阅读进度条（顶部）+ 返回顶部（右下）—— 仅在跃迁抵达后的博客界面启用 -->
+<div class="read-progress" id="read-progress" aria-hidden="true"></div>
+<button class="to-top" id="to-top" type="button" aria-label="返回顶部">
+  <svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
 
 
-/* ═══════════════════════════════════════════════════════
-   曲率引擎跃迁 - 嵌入 One-Body 原版 (iframe)
-   通过 contentWindow 的 jQuery 自动模拟点击, 推进三阶段
-   ═══════════════════════════════════════════════════════ */
-let warpInProgress = false;
-let warpIframe = null;
-let warpFinishTimeoutId = null;
 
-const stage = document.getElementById('warp-stage');
-const warpLoader = document.getElementById('warp-loader');
-const warpSkip = document.getElementById('warp-skip');
-const warpFlash = document.getElementById('warp-flash');
-
-function launchWarp() {
-  if (warpInProgress) return;
-  warpInProgress = true;
-
-  // 1. 公告页淡出 + 显示加载提示
-  document.body.classList.add('warping');
-  document.getElementById('cosmos').classList.add('dim');
-  document.getElementById('page').classList.add('hidden-during-warp');
-  document.getElementById('topbar').classList.add('fade');
-  warpLoader.classList.add('show');
-
-  // 2. 创建 iframe 加载 One-Body
-  // 使用 #autoplay 锚点让 iframe 内部自行驱动跃迁动画 +
-  // 通过 postMessage 与父页面通信，避免 file:// 协议下的跨源限制
-  const iframe = document.createElement('iframe');
-  iframe.src = 'warp/index.html#autoplay';
-  iframe.allow = 'autoplay';
-  iframe.setAttribute('scrolling', 'no');
-  iframe.style.cssText = 'width:100%;height:100%;border:0;display:block;';
-  stage.innerHTML = '';
-  stage.appendChild(iframe);
-  warpIframe = iframe;
-
-  warpSkip.classList.add('show');
-
-  // 安全兜底：若 35s 内仍未收到 finished 事件，则强制结束
-  warpFinishTimeoutId = setTimeout(() => {
-    console.warn('warp 超时未完成, 强制结束跃迁');
-    finishWarp();
-  }, 35000);
-}
-
-/* 监听 iframe 通过 postMessage 上报的事件 */
-window.addEventListener('message', (e) => {
-  const d = e && e.data;
-  if (!d || d.source !== 'warp') return;
-  if (d.event === 'ready') {
-    // 场景已就绪 → 展示舞台并隐藏加载提示
-    if (warpInProgress) {
-      stage.classList.add('show');
-      warpLoader.classList.remove('show');
-    }
-  } else if (d.event === 'finished') {
-    if (warpFinishTimeoutId) { clearTimeout(warpFinishTimeoutId); warpFinishTimeoutId = null; }
-    finishWarp();
-  }
-});
-
-/* 跃迁结束 - 白光闪 + 切到博客 */
-function finishWarp() {
-  if (!warpInProgress) return;
-  warpSkip.classList.remove('show');
-
-  // 白光闪烁
-  warpFlash.style.transition = 'none';
-  warpFlash.style.opacity = '0';
-  requestAnimationFrame(() => {
-    warpFlash.style.transition = 'opacity 0.28s ease-out';
-    warpFlash.style.opacity = '1';
-    setTimeout(() => {
-      // 切换页面 (在白光最亮时切换, 隐藏切换过程)
-      stage.classList.remove('show');
-      warpLoader.classList.remove('show');
-      document.body.classList.remove('warping');
-      document.body.classList.add('arrived');
-      document.getElementById('page').style.display = 'none';
-      const blog = document.getElementById('blog-arrived');
-      blog.classList.add('show');
-      blog.classList.add('fade-in');
-      document.getElementById('return-home').classList.add('show');
-      window.scrollTo({ top: 0 });
-
-      // 白光淡出
-      warpFlash.style.transition = 'opacity 0.95s ease-in';
-      warpFlash.style.opacity = '0';
-
-      // 销毁 iframe (释放 GPU/内存)
-      setTimeout(() => {
-        if (warpIframe && warpIframe.parentNode) {
-          // 通过 postMessage 让 iframe 内部停止音频 (避免 file:// 跨源问题)
-          try {
-            if (warpIframe.contentWindow) {
-              warpIframe.contentWindow.postMessage({ target: 'warp', action: 'stop-audio' }, '*');
-            }
-          } catch (e) {}
-          warpIframe.parentNode.removeChild(warpIframe);
-          warpIframe = null;
-        }
-        warpInProgress = false;
-      }, 1200);
-    }, 290);
-  });
-}
-
-/* 返回公告页 */
-function returnHome() {
-  document.body.classList.remove('arrived');
-  const blog = document.getElementById('blog-arrived');
-  blog.classList.remove('show');
-  blog.classList.remove('fade-in');
-  document.getElementById('return-home').classList.remove('show');
-  document.getElementById('page').style.display = '';
-  document.getElementById('page').classList.remove('hidden-during-warp');
-  document.getElementById('cosmos').classList.remove('dim');
-  document.getElementById('topbar').classList.remove('fade');
-  window.scrollTo({ top: 0 });
-}
-
-/* 事件绑定 */
-document.getElementById('warp-cta-hero').addEventListener('click', launchWarp);
-document.getElementById('warp-cta-bottom').addEventListener('click', launchWarp);
-document.getElementById('return-home').addEventListener('click', returnHome);
-warpSkip.addEventListener('click', () => {
-  if (warpFinishTimeoutId) clearTimeout(warpFinishTimeoutId);
-  finishWarp();
-});
-
-</script>
+<script defer src="js/backgrounds.js"></script>
+<script defer src="js/main.js"></script>
+<script defer src="js/warp.js"></script>
 </body>
 </html>
