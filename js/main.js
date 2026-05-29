@@ -98,33 +98,42 @@
     });
   }
 
-  /* ───────── 阅读进度条 + 返回顶部（仅在跃迁抵达后的博客界面启用） ───────── */
+  /* ───────── 阅读进度条 + 返回顶部（全站可用；warp 过场时隐藏） ───────── */
   const readBar = document.getElementById('read-progress');
   const toTop = document.getElementById('to-top');
 
+  function scrollTopPos() {
+    // body 设了 overflow-y:auto，滚动条可能落在 html/body 任一处，全取最大值
+    return window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+  }
+
   function onScrollChrome() {
-    const arrived = document.body.classList.contains('arrived');
-    if (!arrived) {
-      if (readBar) readBar.classList.remove('show');
-      if (toTop) toTop.classList.remove('show');
-      return;
-    }
+    const warping = document.body.classList.contains('warping');
     const doc = document.documentElement;
-    const scrollTop = window.scrollY || doc.scrollTop || 0;
+    const top = scrollTopPos();
     const max = (doc.scrollHeight - window.innerHeight) || 1;
-    const pct = Math.min(100, Math.max(0, (scrollTop / max) * 100));
+    const pct = Math.min(100, Math.max(0, (top / max) * 100));
     if (readBar) {
       readBar.style.width = pct + '%';
-      readBar.classList.toggle('show', scrollTop > 20);
+      readBar.classList.toggle('show', !warping && top > 20);
     }
-    if (toTop) toTop.classList.toggle('show', scrollTop > 320);
+    if (toTop) {
+      toTop.classList.toggle('show', !warping && top > 240);
+    }
   }
   window.addEventListener('scroll', onScrollChrome, { passive: true });
+  document.addEventListener('scroll', onScrollChrome, { passive: true, capture: true });
   window.addEventListener('resize', onScrollChrome);
+
   if (toTop) {
-    toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    toTop.addEventListener('click', () => {
+      // 兼容不同滚动容器，全部置零
+      try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) { window.scrollTo(0, 0); }
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    });
   }
-  // 抵达 / 返回时会改动 body 类，稍作延时刷新一次进度状态
+  // 抵达 / 返回（warp.js 改动 body 类）后刷新一次显隐状态
   window.refreshChrome = onScrollChrome;
   onScrollChrome();
 

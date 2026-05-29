@@ -893,15 +893,19 @@ body.warping .bg-switch{opacity:0;pointer-events:none}
   pointer-events:none}
 .read-progress.show{opacity:1}
 
-/* —— 返回顶部（右下角，仅抵达后显示） —— */
-.to-top{position:fixed;right:30px;bottom:84px;z-index:210;
-  width:46px;height:46px;border-radius:50%;display:none;align-items:center;justify-content:center;
-  background:var(--panel-bg);backdrop-filter:blur(10px);border:1px solid var(--line);
+/* —— 返回顶部（右下角，滚动出现，全站可用） —— */
+.to-top{position:fixed;right:30px;bottom:88px;z-index:215;
+  width:50px;height:50px;border-radius:50%;display:none;align-items:center;justify-content:center;
+  background:linear-gradient(150deg, color-mix(in srgb,var(--gold) 22%,var(--card)), var(--card));
+  backdrop-filter:blur(10px);border:1px solid color-mix(in srgb,var(--gold) 42%,transparent);
   color:var(--gold-bright);cursor:pointer;transition:all .35s cubic-bezier(.19,1,.22,1);
-  box-shadow:0 10px 30px -16px rgba(0,0,0,.6)}
-.to-top.show{display:inline-flex}
-.to-top:hover{border-color:var(--gold-bright);transform:translateY(-3px);box-shadow:0 14px 34px -16px var(--gold-glow)}
-.to-top svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  box-shadow:0 12px 30px -14px rgba(0,0,0,.7), 0 0 22px -8px var(--gold-glow)}
+.to-top.show{display:inline-flex;animation:toTopIn .45s cubic-bezier(.19,1,.22,1)}
+@keyframes toTopIn{from{opacity:0;transform:translateY(14px) scale(.85)}to{opacity:1;transform:none}}
+.to-top:hover{border-color:var(--gold-bright);color:var(--star);transform:translateY(-3px);
+  box-shadow:0 16px 36px -14px rgba(0,0,0,.7), 0 0 34px -6px var(--gold-glow)}
+.to-top:active{transform:translateY(-1px) scale(.96)}
+.to-top svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 
 /* —— 补迁移组件 · 响应式 —— */
 @media (max-width:1000px){
@@ -924,3 +928,53 @@ body.warping .bg-switch{opacity:0;pointer-events:none}
   .blog-readout{gap:6px 14px;font-size:.72rem}
   .blog-hero-actions .btn{padding:13px 22px;font-size:.76rem}
 }
+
+/* ════════════════════════════════════════════════════════════════
+   博客浏览页 · 内容宽度（统一加宽 + 收窄两侧留白）
+   —— 原先各区段 max-width:1180px 且左右用 8vw，导致笔记本上实际可用宽度
+      偏窄（≈1210px@1440）。这里统一放宽到 1320px，并把两侧留白改为
+      clamp(24px,4vw,64px)，宽屏更舒展、窄屏依旧安全。
+   想整体调宽 / 调窄：改下面的 --blog-w 与左右 padding 即可（Hexo 同理）。
+   ════════════════════════════════════════════════════════════════ */
+:root{ --blog-w:1320px; --blog-pad:clamp(24px, 4vw, 64px); }
+.blog-about,
+.featured-section,
+.sky-section,
+.tonight-section,
+.calendar-section,
+.news-section,
+.links-section{
+  max-width:var(--blog-w);
+  padding-left:var(--blog-pad);
+  padding-right:var(--blog-pad);
+}
+.blog-about{ max-width:var(--blog-w) }          /* 原 1100px → 与其余区段对齐 */
+.blog-foot{ padding-left:var(--blog-pad); padding-right:var(--blog-pad) }
+.blog-foot-grid,
+.blog-foot-bottom{ max-width:var(--blog-w) }
+/* 抵达后博客 HERO 两侧留白也略放宽，与下方区段呼应 */
+.blog-hero{ padding-left:var(--blog-pad); padding-right:var(--blog-pad) }
+
+/* ════════════════════════════════════════════════════════════════
+   公告页 · 内容宽度（与博客页统一节奏，避免相比之下显窄）
+   —— 两侧留白改用与博客页相同的 --blog-pad；主要区块适度加宽。
+      阅读型区块（公告卡 / 时间线 / 引言 / 即将上线文案）仅温和加宽，
+      仍保证舒适的阅读行宽。
+   ════════════════════════════════════════════════════════════════ */
+.announce-section,
+.timeline-section,
+.features-section,
+.quote-section,
+.social-section,
+.coming-section{
+  padding-left:var(--blog-pad);
+  padding-right:var(--blog-pad);
+}
+.page > footer{ padding-left:var(--blog-pad); padding-right:var(--blog-pad) }
+
+/* 区块最大宽度上调 */
+.cosmos-grid{ max-width:1180px }     /* 星座卡网格：960 → 1180，卡片更舒展 */
+.announce-card{ max-width:880px }    /* 公告卡：720 → 880，更有分量仍易读 */
+.timeline{ max-width:760px }         /* 时间线：700 → 760，温和 */
+.quote-section blockquote{ max-width:760px }  /* 引言：680 → 760 */
+.coming-desc{ max-width:660px }      /* 即将上线文案：580 → 660 */
